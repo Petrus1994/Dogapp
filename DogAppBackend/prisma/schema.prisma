@@ -1,0 +1,833 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── USERS & AUTH ────────────────────────────────────────────────────────────
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  emailVerified   Boolean   @default(false)
+  passwordHash    String
+  displayName     String?
+  scenarioType    String?
+  onboardingDone  Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  sessions                  Session[]
+  emailVerificationTokens   EmailVerificationToken[]
+  passwordResetTokens       PasswordResetToken[]
+  dogs                      Dog[]
+  breedSelectionProfiles    BreedSelectionProfile[]
+  trainingPlans             TrainingPlan[]
+  aiConversations           AiConversation[]
+  subscription              Subscription?
+  subscriptionEvents        SubscriptionEvent[]
+  aiUsage                   AiUsage[]
+  referralsGiven            Referral[]        @relation("ReferrerRelation")
+  referralReceived          Referral?         @relation("ReferredRelation")
+  referralRewards           ReferralReward[]
+  notificationTokens        NotificationToken[]
+  notificationJobs          NotificationJob[]
+  userProgress              UserProgress?
+  userChallenges            UserChallenge[]
+  auditLogs                 AuditLog[]
+
+  @@map("users")
+}
+
+model Session {
+  id            String    @id @default(cuid())
+  userId        String
+  refreshToken  String    @unique
+  deviceName    String?
+  ipAddress     String?
+  expiresAt     DateTime
+  createdAt     DateTime  @default(now())
+  revokedAt     DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_verification_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+// ─── DOGS ────────────────────────────────────────────────────────────────────
+
+model Dog {
+  id              String    @id @default(cuid())
+  userId          String
+  name            String
+  gender          String
+  ageGroup        String
+  birthDate       DateTime?
+  breed           String?
+  isBreedUnknown  Boolean   @default(false)
+  size            String?
+  activityLevel   String
+  photoUrl        String?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  issues                DogIssue[]
+  memory                DogMemory?
+  behaviorDimensions    BehaviorDimension[]
+  behaviorScoreHistory  BehaviorScoreHistory[]
+  recurringTriggers     RecurringTrigger[]
+  dailyLogs             DailyLog[]
+  feedingLogs           FeedingLog[]
+  walkLogs              WalkLog[]
+  playLogs              PlayLog[]
+  trainingSessionLogs   TrainingSessionLog[]
+  toiletEvents          ToiletEvent[]
+  behaviorEvents        BehaviorEvent[]
+  userNotes             UserNote[]
+  extractedSignals      ExtractedNoteSignal[]
+  aiAdviceHistory       AiAdviceHistory[]
+  dailyInsights         DailyInsight[]
+  shareSummaries        ShareSummary[]
+  adaptivePattern       AdaptivePattern?
+  dailyRoutines         DailyRoutine[]
+  trainingPlans         TrainingPlan[]
+  taskFeedback          TaskFeedback[]
+  notificationJobs      NotificationJob[]
+
+  @@map("dogs")
+}
+
+model DogIssue {
+  id        String   @id @default(cuid())
+  dogId     String
+  issue     String
+  createdAt DateTime @default(now())
+
+  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@unique([dogId, issue])
+  @@map("dog_issues")
+}
+
+// ─── BREED SELECTION ─────────────────────────────────────────────────────────
+
+model BreedSelectionProfile {
+  id                String   @id @default(cuid())
+  userId            String
+  lifestyle         String?
+  homeType          String?
+  experienceLevel   String?
+  availableTime     String?
+  hasChildren       Boolean?
+  goal              String?
+  sizePreference    String?
+  weightPreference  String?
+  coatType          String?
+  groomingTolerance String?
+  noiseTolerance    String?
+  energyExpectation String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  breedRecommendations BreedRecommendation[]
+
+  @@map("breed_selection_profiles")
+}
+
+model BreedRecommendation {
+  id                   String   @id @default(cuid())
+  selectionProfileId   String
+  breedName            String
+  breedDescription     String
+  reason               String
+  rank                 Int      @default(1)
+  createdAt            DateTime @default(now())
+
+  selectionProfile BreedSelectionProfile @relation(fields: [selectionProfileId], references: [id], onDelete: Cascade)
+
+  @@map("breed_recommendations")
+}
+
+// ─── TRAINING PLANS & TASKS ──────────────────────────────────────────────────
+
+model TrainingPlan {
+  id           String   @id @default(cuid())
+  userId       String
+  dogId        String?
+  title        String
+  planType     String
+  goal         String
+  weeklyFocus  String
+  tips         String[]
+  startDate    DateTime
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dog   Dog?         @relation(fields: [dogId], references: [id], onDelete: SetNull)
+  tasks TrainingTask[]
+
+  @@map("training_plans")
+}
+
+model TrainingTask {
+  id              String   @id @default(cuid())
+  planId          String
+  title           String
+  description     String
+  category        String
+  difficulty      Int
+  expectedOutcome String
+  status          String   @default("pending")
+  scheduledDay    Int
+  notes           String   @default("")
+  updatedAt       DateTime @updatedAt
+
+  plan     TrainingPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  feedback TaskFeedback[]
+
+  @@map("training_tasks")
+}
+
+model TaskFeedback {
+  id               String   @id @default(cuid())
+  taskId           String
+  dogId            String?
+  result           String
+  timingNote       String?
+  situationNote    String?
+  dogBehaviorNote  String?
+  freeText         String?
+  createdAt        DateTime @default(now())
+
+  task       TrainingTask  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  dog        Dog?          @relation(fields: [dogId], references: [id], onDelete: SetNull)
+  adjustment AiAdjustment?
+
+  @@map("task_feedback")
+}
+
+model AiAdjustment {
+  id               String   @id @default(cuid())
+  feedbackId       String   @unique
+  probableCause    String
+  probableMistake  String
+  doNow            String[]
+  avoid            String[]
+  nextAttempt      String
+  createdAt        DateTime @default(now())
+
+  feedback TaskFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  @@map("ai_adjustments")
+}
+
+// ─── DAILY LOGS ──────────────────────────────────────────────────────────────
+
+model DailyLog {
+  id        String   @id @default(cuid())
+  dogId     String
+  logDate   DateTime @db.Date
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  dog              Dog                  @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  feedingLogs      FeedingLog[]
+  walkLogs         WalkLog[]
+  playLogs         PlayLog[]
+  trainingLogs     TrainingSessionLog[]
+  toiletEvents     ToiletEvent[]
+  behaviorEvents   BehaviorEvent[]
+
+  @@unique([dogId, logDate])
+  @@map("daily_logs")
+}
+
+model FeedingLog {
+  id            String   @id @default(cuid())
+  dailyLogId    String
+  dogId         String
+  loggedAt      DateTime
+  foodType      String?
+  feedingNumber Int?
+  durationMin   Int?
+  notes         String   @default("")
+  createdAt     DateTime @default(now())
+
+  dailyLog DailyLog @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
+  dog      Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("feeding_logs")
+}
+
+model WalkLog {
+  id          String   @id @default(cuid())
+  dailyLogId  String
+  dogId       String
+  loggedAt    DateTime
+  durationMin Int
+  distanceKm  Decimal? @db.Decimal(5, 2)
+  walkQuality String?
+  stepCount   Int?
+  notes       String   @default("")
+  createdAt   DateTime @default(now())
+
+  dailyLog DailyLog @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
+  dog      Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("walk_logs")
+}
+
+model PlayLog {
+  id           String   @id @default(cuid())
+  dailyLogId   String
+  dogId        String
+  loggedAt     DateTime
+  durationMin  Int
+  playActivity String?
+  notes        String   @default("")
+  createdAt    DateTime @default(now())
+
+  dailyLog DailyLog @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
+  dog      Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("play_logs")
+}
+
+model TrainingSessionLog {
+  id          String   @id @default(cuid())
+  dailyLogId  String
+  dogId       String
+  loggedAt    DateTime
+  durationMin Int
+  notes       String   @default("")
+  createdAt   DateTime @default(now())
+
+  dailyLog DailyLog @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
+  dog      Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("training_session_logs")
+}
+
+model ToiletEvent {
+  id                        String   @id @default(cuid())
+  dogId                     String
+  dailyLogId                String?
+  occurredAt                DateTime
+  outcome                   String
+  minutesAfterLastFeeding   Int?
+  minutesAfterLastSleep     Int?
+  notes                     String   @default("")
+  createdAt                 DateTime @default(now())
+
+  dog      Dog       @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  dailyLog DailyLog? @relation(fields: [dailyLogId], references: [id], onDelete: SetNull)
+
+  @@map("toilet_events")
+}
+
+// ─── BEHAVIOR EVENTS ─────────────────────────────────────────────────────────
+
+model BehaviorEvent {
+  id           String   @id @default(cuid())
+  dogId        String
+  dailyLogId   String?
+  activityType String?
+  notes        String   @default("")
+  occurredAt   DateTime
+  createdAt    DateTime @default(now())
+
+  dog      Dog                  @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  dailyLog DailyLog?            @relation(fields: [dailyLogId], references: [id], onDelete: SetNull)
+  issues   BehaviorEventIssue[]
+
+  @@map("behavior_events")
+}
+
+model BehaviorEventIssue {
+  eventId String
+  issue   String
+
+  event BehaviorEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, issue])
+  @@map("behavior_event_issues")
+}
+
+// ─── NOTES & EXTRACTION ──────────────────────────────────────────────────────
+
+model UserNote {
+  id              String    @id @default(cuid())
+  dogId           String
+  sourceType      String
+  sourceId        String?
+  rawText         String
+  isExtracted     Boolean   @default(false)
+  extractionError String?
+  createdAt       DateTime  @default(now())
+
+  dog      Dog                   @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  signals  ExtractedNoteSignal[]
+
+  @@map("user_notes")
+}
+
+model ExtractedNoteSignal {
+  id             String   @id @default(cuid())
+  noteId         String
+  dogId          String
+  signalType     String
+  dimension      String?
+  content        String
+  sentimentScore Decimal? @db.Decimal(4, 3)
+  confidence     Decimal? @db.Decimal(4, 3)
+  createdAt      DateTime @default(now())
+
+  note UserNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  dog  Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("extracted_note_signals")
+}
+
+// ─── BEHAVIOR SCORES & MEMORY ────────────────────────────────────────────────
+
+model BehaviorDimension {
+  id          String   @id @default(cuid())
+  dogId       String
+  dimension   String
+  score       Decimal  @default(50) @db.Decimal(5, 2)
+  trend       String   @default("stable")
+  confidence  Decimal  @default(0) @db.Decimal(5, 2)
+  lastUpdated DateTime @default(now())
+
+  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@unique([dogId, dimension])
+  @@map("behavior_dimensions")
+}
+
+model BehaviorScoreHistory {
+  id            String   @id @default(cuid())
+  dogId         String
+  dimension     String
+  snapshotDate  DateTime @db.Date
+  score         Decimal  @db.Decimal(5, 2)
+  dailySignal   Decimal? @db.Decimal(5, 2)
+  confidence    Decimal? @db.Decimal(5, 2)
+  activityCount Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@unique([dogId, dimension, snapshotDate])
+  @@map("behavior_score_history")
+}
+
+model DogMemory {
+  id                    String    @id @default(cuid())
+  dogId                 String    @unique
+  currentFocusArea      String?
+  currentStrengths      String[]
+  currentWeakAreas      String[]
+  recurringTriggers     String[]
+  whatWorked            String[]
+  whatFailed            String[]
+  recentIssuesSummary   String?
+  recentWinsSummary     String?
+  aiContextSnapshot     String?
+  snapshotGeneratedAt   DateTime?
+  totalSessionsLogged   Int       @default(0)
+  totalNotesProcessed   Int       @default(0)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("dog_memory")
+}
+
+model RecurringTrigger {
+  id               String   @id @default(cuid())
+  dogId            String
+  triggerPattern   String
+  activityContext  String?
+  occurrenceCount  Int      @default(1)
+  firstSeen        DateTime @default(now())
+  lastSeen         DateTime @default(now())
+  isResolved       Boolean  @default(false)
+
+  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@unique([dogId, triggerPattern])
+  @@map("recurring_triggers")
+}
+
+// ─── AI CONVERSATIONS ────────────────────────────────────────────────────────
+
+model AiConversation {
+  id            String   @id @default(cuid())
+  userId        String
+  dogId         String?
+  createdAt     DateTime @default(now())
+  lastMessageAt DateTime @default(now())
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AiMessage[]
+
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id               String   @id @default(cuid())
+  conversationId   String
+  role             String
+  content          String
+  promptVersionId  String?
+  tokensUsed       Int?
+  latencyMs        Int?
+  createdAt        DateTime @default(now())
+
+  conversation  AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  promptVersion PromptVersion? @relation(fields: [promptVersionId], references: [id], onDelete: SetNull)
+
+  @@map("ai_messages")
+}
+
+model AiAdviceHistory {
+  id          String   @id @default(cuid())
+  dogId       String
+  adviceType  String
+  adviceText  String
+  wasHelpful  Boolean?
+  createdAt   DateTime @default(now())
+
+  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("ai_advice_history")
+}
+
+model DailyInsight {
+  id             String   @id @default(cuid())
+  dogId          String
+  insightDate    DateTime @db.Date
+  insightText    String
+  dimensionFocus String?
+  scoreDelta     Decimal? @db.Decimal(5, 2)
+  createdAt      DateTime @default(now())
+
+  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@unique([dogId, insightDate])
+  @@map("daily_insights")
+}
+
+model ShareSummary {
+  id             String    @id @default(cuid())
+  dogId          String
+  summaryText    String
+  shareUrlToken  String    @unique @default(cuid())
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("share_summaries")
+}
+
+// ─── SUBSCRIPTIONS ───────────────────────────────────────────────────────────
+
+model Subscription {
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  tier                String    @default("free")
+  platform            String?
+  storeProductId      String?
+  storeTransactionId  String?
+  storeOriginalTxId   String?
+  expiresAt           DateTime?
+  cancelledAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model SubscriptionEvent {
+  id                     String   @id @default(cuid())
+  userId                 String
+  eventType              String
+  tierBefore             String?
+  tierAfter              String?
+  storeNotificationRaw   Json?
+  createdAt              DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscription_events")
+}
+
+model AiUsage {
+  id           String   @id @default(cuid())
+  userId       String
+  usageDate    DateTime @db.Date
+  requestCount Int      @default(0)
+  tokenCount   Int      @default(0)
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, usageDate])
+  @@map("ai_usage")
+}
+
+// ─── REFERRALS ───────────────────────────────────────────────────────────────
+
+model Referral {
+  id              String    @id @default(cuid())
+  referrerId      String
+  referredId      String?   @unique
+  referralCode    String    @unique @default(cuid())
+  status          String    @default("pending")
+  ipAddressHash   String?
+  createdAt       DateTime  @default(now())
+  convertedAt     DateTime?
+
+  referrer User            @relation("ReferrerRelation", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred User?           @relation("ReferredRelation", fields: [referredId], references: [id], onDelete: SetNull)
+  rewards  ReferralReward[]
+
+  @@map("referrals")
+}
+
+model ReferralReward {
+  id          String   @id @default(cuid())
+  referralId  String
+  userId      String
+  rewardType  String
+  rewardValue Int
+  grantedAt   DateTime @default(now())
+
+  referral Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("referral_rewards")
+}
+
+// ─── NOTIFICATIONS ───────────────────────────────────────────────────────────
+
+model NotificationToken {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  platform   String   @default("ios")
+  deviceName String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  lastSeen   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_tokens")
+}
+
+model NotificationJob {
+  id            String    @id @default(cuid())
+  userId        String
+  dogId         String?
+  jobType       String
+  scheduledFor  DateTime
+  sentAt        DateTime?
+  failedAt      DateTime?
+  errorMessage  String?
+  payload       Json      @default("{}")
+  createdAt     DateTime  @default(now())
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dog  Dog?  @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("notification_jobs")
+}
+
+// ─── GAMIFICATION ────────────────────────────────────────────────────────────
+
+model UserProgress {
+  id                        String   @id @default(cuid())
+  userId                    String   @unique
+  totalPoints               Int      @default(0)
+  currentStreak             Int      @default(0)
+  longestStreak             Int      @default(0)
+  lastActiveDate            DateTime? @db.Date
+  level                     String   @default("beginner")
+  consecutiveSuccessCount   Int      @default(0)
+  consecutiveNoIssuesCount  Int      @default(0)
+  updatedAt                 DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_progress")
+}
+
+model Challenge {
+  id            String  @id @default(cuid())
+  challengeType String  @unique
+  title         String
+  description   String
+  icon          String
+  requirement   Int
+  pointReward   Int
+  requiresDog   Boolean @default(true)
+
+  userChallenges UserChallenge[]
+
+  @@map("challenges")
+}
+
+model UserChallenge {
+  id          String    @id @default(cuid())
+  userId      String
+  challengeId String
+  progress    Int       @default(0)
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge Challenge @relation(fields: [challengeId], references: [id])
+
+  @@unique([userId, challengeId])
+  @@map("user_challenges")
+}
+
+// ─── ADAPTIVE PATTERNS ───────────────────────────────────────────────────────
+
+model AdaptivePattern {
+  id                      String    @id @default(cuid())
+  dogId                   String    @unique
+  toiletAfterSleepMin     Decimal?  @db.Decimal(6, 2)
+  toiletAfterFeedingMin   Decimal?  @db.Decimal(6, 2)
+  trainingFatigueMin      Decimal?  @db.Decimal(6, 2)
+  activityFatigueMin      Decimal?  @db.Decimal(6, 2)
+  sampleCount             Int       @default(0)
+  lastLearnedAt           DateTime?
+  updatedAt               DateTime  @updatedAt
+
+  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("adaptive_patterns")
+}
+
+// ─── DAILY ROUTINES ──────────────────────────────────────────────────────────
+
+model DailyRoutine {
+  id          String   @id @default(cuid())
+  dogId       String
+  routineDate DateTime @db.Date
+  generatedAt DateTime @default(now())
+
+  dog    Dog            @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  cycles RoutineCycle[]
+
+  @@unique([dogId, routineDate])
+  @@map("daily_routines")
+}
+
+model RoutineCycle {
+  id                   String    @id @default(cuid())
+  routineId            String
+  cycleNumber          Int
+  phase                String
+  suggestedTime        DateTime
+  expectedDurationMin  Int
+  isCompleted          Boolean   @default(false)
+  completedAt          DateTime?
+  linkedActivityId     String?
+  skipped              Boolean   @default(false)
+
+  routine DailyRoutine @relation(fields: [routineId], references: [id], onDelete: Cascade)
+
+  @@unique([routineId, cycleNumber, phase])
+  @@map("routine_cycles")
+}
+
+// ─── PROMPT VERSIONING ───────────────────────────────────────────────────────
+
+model PromptVersion {
+  id         String   @id @default(cuid())
+  name       String
+  promptType String
+  version    String
+  content    String
+  isActive   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  messages AiMessage[]
+
+  @@unique([name, version])
+  @@map("prompt_versions")
+}
+
+// ─── AUDIT LOGS ──────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String?
+  entityId   String?
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+model ErrorLog {
+  id           String   @id @default(cuid())
+  service      String
+  errorCode    String?
+  errorMessage String
+  stackTrace   String?
+  requestId    String?
+  userId       String?
+  metadata     Json     @default("{}")
+  createdAt    DateTime @default(now())
+
+  @@map("error_logs")
+}
