@@ -261,6 +261,8 @@ struct QuickLogSheet: View {
             return "Structured play works better than chaotic free-running. Try fetch or scent games with breaks."
         case .feeding:
             return "Food excitement is common. Try asking for a 'sit' before placing the bowl to build calm feeding habits."
+        case .parkSession:
+            return "Let the dog sniff and explore freely. Sniffing is mentally exhausting — it's as tiring as a run."
         }
     }
 

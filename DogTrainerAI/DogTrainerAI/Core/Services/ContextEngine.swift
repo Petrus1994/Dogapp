@@ -449,6 +449,15 @@ struct ContextEngine {
                 ctaLabel: "Log feeding", type: .activity(.feeding),
                 timingHint: hint, methodologyTip: tip
             )
+        case .parkSession:
+            let walkMins = norms.map { $0.walkMinPerDay / max(1, $0.walkSessionsPerDay) } ?? 20
+            return Action(
+                icon: "🌳", title: "Park session",
+                subtitle: "Walk + Play · ~\(walkMins + 15) min",
+                rationale: "A park visit combines exercise and socialisation — great for energy and confidence.",
+                ctaLabel: "Start", type: .activity(.parkSession),
+                timingHint: hint, methodologyTip: tip
+            )
         }
     }
 
@@ -467,6 +476,9 @@ struct ContextEngine {
             return "~\(norms.trainingMinPerSession) min max"
         case .feeding:
             return "\(norms.feedingsPerDay)× per day"
+        case .parkSession:
+            let perSession = norms.walkMinPerDay / max(1, norms.walkSessionsPerDay)
+            return "~\(perSession + 15) min combined"
         }
     }
 
@@ -477,7 +489,8 @@ struct ContextEngine {
         case .walking:  return "Calm start, loose leash, make contact first."
         case .playing:  return "Keep it engaging but controlled. End while it's still fun."
         case .training: return "Short, clear, positive. Stop before frustration builds."
-        case .feeding:  return "Calm state before food. No rushing or overexcitement."
+        case .feeding:      return "Calm state before food. No rushing or overexcitement."
+        case .parkSession:  return "Let the dog sniff and explore. No agenda — just presence."
         }
     }
 

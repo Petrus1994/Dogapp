@@ -7,8 +7,13 @@ struct UserProgress: Codable {
     var lastActiveDate: Date?
     var level: UserLevel
     var completedChallengeIds: [String]
-    var consecutiveSuccessCount: Int   // anti-cheat: tracks unbroken task successes
-    var consecutiveNoIssuesCount: Int  // anti-cheat: tracks days with zero issues reported
+    var consecutiveSuccessCount: Int    // anti-cheat: tracks unbroken task successes
+    var consecutiveNoIssuesCount: Int   // anti-cheat: tracks days with zero issues reported
+
+    // MARK: - Streak shield system
+    var streakShields: Int              // banked shields (max 3)
+    var shieldProtectedDate: Date?      // if set, this day's missed streak is forgiven
+    var lastShieldAwardedAtStreak: Int  // prevents double-awarding at same milestone
 
     static let initial = UserProgress(
         totalPoints: 0,
@@ -18,8 +23,30 @@ struct UserProgress: Codable {
         level: .beginner,
         completedChallengeIds: [],
         consecutiveSuccessCount: 0,
-        consecutiveNoIssuesCount: 0
+        consecutiveNoIssuesCount: 0,
+        streakShields: 0,
+        shieldProtectedDate: nil,
+        lastShieldAwardedAtStreak: 0
     )
+
+    // MARK: - Shield helpers
+
+    /// Returns true if the user has a shield available and it's not yet used today
+    var hasAvailableShield: Bool { streakShields > 0 }
+
+    mutating func consumeShield(for date: Date) {
+        guard streakShields > 0 else { return }
+        streakShields -= 1
+        shieldProtectedDate = Calendar.current.startOfDay(for: date)
+    }
+
+    /// Award a shield when reaching a new 7-day milestone
+    mutating func checkAndAwardShield() {
+        let milestone = (currentStreak / 7) * 7
+        guard milestone > 0, milestone > lastShieldAwardedAtStreak, streakShields < 3 else { return }
+        streakShields = min(streakShields + 1, 3)
+        lastShieldAwardedAtStreak = milestone
+    }
 
     enum UserLevel: String, Codable, CaseIterable {
         case beginner, consistent, responsible, advanced

@@ -3,9 +3,10 @@ import Foundation
 struct NormCalculationService {
 
     /// Compute daily activity norms based on the dog's profile.
+    /// Uses `effectiveActivityLevel` so overrides are respected.
     static func norms(for profile: DogProfile) -> ActivityNorms {
         let age    = profile.ageGroup
-        let energy = profile.activityLevel
+        let energy = profile.effectiveActivityLevel
 
         return ActivityNorms(
             walkMinPerDay:           walkMinutes(age: age, energy: energy),
@@ -135,17 +136,25 @@ struct NormCalculationService {
     // MARK: - Norm completion
 
     /// Returns 0.0–1.0 completion fraction for walk duration vs norm.
+    /// Counts parkSession as walk (half its duration attributed to walking).
     static func walkCompletion(activities: [DailyActivity], norms: ActivityNorms) -> Double {
-        let totalMin = activities.filter { $0.type == .walking && $0.completed }
-            .reduce(0) { $0 + $1.durationMinutes }
+        let totalMin = activities.filter { $0.completed }.reduce(0) { sum, a in
+            if a.type == .walking    { return sum + a.durationMinutes }
+            if a.type == .parkSession{ return sum + a.durationMinutes / 2 }
+            return sum
+        }
         guard norms.walkMinPerDay > 0 else { return 1.0 }
         return min(Double(totalMin) / Double(norms.walkMinPerDay), 1.0)
     }
 
     /// Returns 0.0–1.0 for play minutes vs norm.
+    /// Counts parkSession as play (half its duration attributed to play).
     static func playCompletion(activities: [DailyActivity], norms: ActivityNorms) -> Double {
-        let totalMin = activities.filter { $0.type == .playing && $0.completed }
-            .reduce(0) { $0 + $1.durationMinutes }
+        let totalMin = activities.filter { $0.completed }.reduce(0) { sum, a in
+            if a.type == .playing    { return sum + a.durationMinutes }
+            if a.type == .parkSession{ return sum + a.durationMinutes / 2 }
+            return sum
+        }
         guard norms.playMinPerDay > 0 else { return 1.0 }
         return min(Double(totalMin) / Double(norms.playMinPerDay), 1.0)
     }

@@ -5,13 +5,20 @@ struct DogProfile: Codable, Identifiable {
     var name: String
     var gender: Gender
     var ageGroup: AgeGroup
-    var birthDate: Date?          // exact birth date if known; drives aging logic
+    var birthDate: Date?                    // exact birth date if known; drives aging logic
     var breed: String
     var isBreedUnknown: Bool
     var size: DogSize?
-    var activityLevel: ActivityLevel
+    var activityLevel: ActivityLevel        // auto-derived from breed; user can override in Settings
+    var activityLevelOverride: ActivityLevel? // explicit user override; nil = use breed default
+    var coatColor: CoatColor                // new: drives avatar appearance
     var issues: [DogIssue]
     var photoURL: String?
+
+    /// The level actually used for norm calculations — override wins if set
+    var effectiveActivityLevel: ActivityLevel {
+        activityLevelOverride ?? activityLevel
+    }
 
     // MARK: - Exact age helpers
 
@@ -32,33 +39,40 @@ struct DogProfile: Codable, Identifiable {
     // MARK: - Codable (backward-compat: birthDate is optional)
 
     enum CodingKeys: String, CodingKey {
-        case id, name, gender, ageGroup, birthDate, breed, isBreedUnknown, size, activityLevel, issues, photoURL
+        case id, name, gender, ageGroup, birthDate, breed, isBreedUnknown, size
+        case activityLevel, activityLevelOverride, coatColor, issues, photoURL
     }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        id             = try c.decode(String.self,         forKey: .id)
-        name           = try c.decode(String.self,         forKey: .name)
-        gender         = try c.decode(Gender.self,         forKey: .gender)
-        ageGroup       = try c.decode(AgeGroup.self,       forKey: .ageGroup)
-        birthDate      = try? c.decode(Date.self,          forKey: .birthDate)
-        breed          = try c.decode(String.self,         forKey: .breed)
-        isBreedUnknown = try c.decode(Bool.self,           forKey: .isBreedUnknown)
-        size           = try? c.decode(DogSize.self,       forKey: .size)
-        activityLevel  = try c.decode(ActivityLevel.self,  forKey: .activityLevel)
-        issues         = (try? c.decode([DogIssue].self,   forKey: .issues)) ?? []
-        photoURL       = try? c.decode(String.self,        forKey: .photoURL)
+        id                    = try c.decode(String.self,         forKey: .id)
+        name                  = try c.decode(String.self,         forKey: .name)
+        gender                = try c.decode(Gender.self,         forKey: .gender)
+        ageGroup              = try c.decode(AgeGroup.self,       forKey: .ageGroup)
+        birthDate             = try? c.decode(Date.self,          forKey: .birthDate)
+        breed                 = try c.decode(String.self,         forKey: .breed)
+        isBreedUnknown        = try c.decode(Bool.self,           forKey: .isBreedUnknown)
+        size                  = try? c.decode(DogSize.self,       forKey: .size)
+        activityLevel         = (try? c.decode(ActivityLevel.self, forKey: .activityLevel)) ?? .medium
+        activityLevelOverride = try? c.decode(ActivityLevel.self, forKey: .activityLevelOverride)
+        coatColor             = (try? c.decode(CoatColor.self,    forKey: .coatColor)) ?? .golden
+        issues                = (try? c.decode([DogIssue].self,   forKey: .issues)) ?? []
+        photoURL              = try? c.decode(String.self,        forKey: .photoURL)
     }
 
     init(
         id: String, name: String, gender: Gender, ageGroup: AgeGroup,
         birthDate: Date? = nil, breed: String, isBreedUnknown: Bool,
         size: DogSize? = nil, activityLevel: ActivityLevel,
+        activityLevelOverride: ActivityLevel? = nil,
+        coatColor: CoatColor = .golden,
         issues: [DogIssue] = [], photoURL: String? = nil
     ) {
         self.id = id; self.name = name; self.gender = gender; self.ageGroup = ageGroup
         self.birthDate = birthDate; self.breed = breed; self.isBreedUnknown = isBreedUnknown
         self.size = size; self.activityLevel = activityLevel
+        self.activityLevelOverride = activityLevelOverride
+        self.coatColor = coatColor
         self.issues = issues; self.photoURL = photoURL
     }
 

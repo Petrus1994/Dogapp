@@ -59,9 +59,12 @@ final class AppState: ObservableObject {
             allBehaviorEvents = BehaviorTrackingService.shared.loadAll()
             behaviorProgress  = userDefaultsManager.loadBehaviorProgress() ?? .initial
 
-            // Check streak break on launch
-            StreakService.checkForStreakBreak(progress: &userProgress)
+            // Check streak break on launch (shield may absorb it)
+            let streakResult = StreakService.checkForStreakBreak(progress: &userProgress)
             userDefaultsManager.saveUserProgress(userProgress)
+            if let msg = streakResult.notificationMessage {
+                ageProgressionAnnouncement = msg  // reuse announcement slot for shield messages
+            }
 
             BackendSyncService.shared.setBackendDogId(userDefaultsManager.loadBackendDogId())
 
@@ -218,10 +221,11 @@ final class AppState: ObservableObject {
 
         // Mirror to backend
         switch activity.type {
-        case .walking:  BackendSyncService.shared.syncWalk(activity)
-        case .feeding:  BackendSyncService.shared.syncFeeding(activity)
-        case .playing:  BackendSyncService.shared.syncPlay(activity)
-        case .training: BackendSyncService.shared.syncTraining(activity)
+        case .walking:     BackendSyncService.shared.syncWalk(activity)
+        case .feeding:     BackendSyncService.shared.syncFeeding(activity)
+        case .playing:     BackendSyncService.shared.syncPlay(activity)
+        case .training:    BackendSyncService.shared.syncTraining(activity)
+        case .parkSession: BackendSyncService.shared.syncParkSession(activity)
         }
 
         // Auto-complete the next matching routine cycle
@@ -239,10 +243,10 @@ final class AppState: ObservableObject {
         guard var routine = dailyRoutine else { return }
         let matchingPhase: CyclePhase
         switch activity.type {
-        case .walking:  matchingPhase = .physical
-        case .playing:  matchingPhase = .physical
-        case .training: matchingPhase = .mental
-        case .feeding:  matchingPhase = .feeding
+        case .walking, .parkSession: matchingPhase = .physical
+        case .playing:               matchingPhase = .physical
+        case .training:              matchingPhase = .mental
+        case .feeding:               matchingPhase = .feeding
         }
         if let idx = routine.cycles.firstIndex(where: {
             $0.phase == matchingPhase && !$0.isCompleted && !$0.skipped

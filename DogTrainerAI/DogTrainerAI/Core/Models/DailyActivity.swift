@@ -58,52 +58,61 @@ struct DailyActivity: Codable, Identifiable {
     // MARK: - Activity types
 
     enum ActivityType: String, Codable, CaseIterable {
-        case feeding, walking, playing, training
+        case feeding, walking, playing, training, parkSession
 
         var displayName: String {
             switch self {
-            case .feeding:  return "Feeding"
-            case .walking:  return "Walk"
-            case .playing:  return "Play"
-            case .training: return "Training"
+            case .feeding:     return "Feeding"
+            case .walking:     return "Walk"
+            case .playing:     return "Play"
+            case .training:    return "Training"
+            case .parkSession: return "Park Session"
             }
         }
 
         var icon: String {
             switch self {
-            case .feeding:  return "🍖"
-            case .walking:  return "🦮"
-            case .playing:  return "🎾"
-            case .training: return "🎯"
+            case .feeding:     return "🍖"
+            case .walking:     return "🦮"
+            case .playing:     return "🎾"
+            case .training:    return "🎯"
+            case .parkSession: return "🌳"
             }
         }
 
         var systemIcon: String {
             switch self {
-            case .feeding:  return "fork.knife"
-            case .walking:  return "figure.walk"
-            case .playing:  return "figure.play"
-            case .training: return "brain.head.profile"
+            case .feeding:     return "fork.knife"
+            case .walking:     return "figure.walk"
+            case .playing:     return "figure.play"
+            case .training:    return "brain.head.profile"
+            case .parkSession: return "tree"
             }
         }
 
         var defaultDurationMinutes: Int {
             switch self {
-            case .feeding:  return 10
-            case .walking:  return 30
-            case .playing:  return 20
-            case .training: return 15
+            case .feeding:     return 10
+            case .walking:     return 30
+            case .playing:     return 20
+            case .training:    return 15
+            case .parkSession: return 45
             }
         }
 
         var pointValue: Int {
             switch self {
-            case .feeding:  return 5
-            case .walking:  return 8
-            case .playing:  return 6
-            case .training: return 5
+            case .feeding:     return 5
+            case .walking:     return 8
+            case .playing:     return 6
+            case .training:    return 5
+            case .parkSession: return 12  // bonus: covers walk + play in one
             }
         }
+
+        // Park sessions count as both walk and play for norm completion
+        var countsAsWalk: Bool  { self == .walking  || self == .parkSession }
+        var countsAsPlay: Bool  { self == .playing   || self == .parkSession }
     }
 
     // MARK: - Walk quality

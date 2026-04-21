@@ -5,15 +5,17 @@ import { DogService } from '../services/DogService'
 import { prisma } from '../lib/prisma'
 
 const CreateDogBody = z.object({
-  name:           z.string().min(1).max(50),
-  gender:         z.enum(['male', 'female']),
-  ageGroup:       z.string(),
-  birthDate:      z.string().datetime().optional(),
-  breed:          z.string().optional(),
-  isBreedUnknown: z.boolean().default(false),
-  size:           z.enum(['small', 'medium', 'large']).optional(),
-  activityLevel:  z.enum(['low', 'medium', 'high']),
-  issues:         z.array(z.string()).default([]),
+  name:                 z.string().min(1).max(50),
+  gender:               z.enum(['male', 'female']),
+  ageGroup:             z.string(),
+  birthDate:            z.string().datetime().optional(),
+  breed:                z.string().optional(),
+  isBreedUnknown:       z.boolean().default(false),
+  size:                 z.enum(['small', 'medium', 'large']).optional(),
+  activityLevel:        z.enum(['low', 'medium', 'high']),
+  activityLevelOverride:z.enum(['low', 'medium', 'high']).optional(),
+  coatColor:            z.string().optional(),
+  issues:               z.array(z.string()).default([]),
 })
 
 export async function dogRoutes(app: FastifyInstance) {

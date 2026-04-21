@@ -2,15 +2,17 @@ import { PrismaClient } from '@prisma/client'
 import { Errors } from '../lib/errors'
 
 export interface CreateDogInput {
-  name:           string
-  gender:         string
-  ageGroup:       string
-  birthDate?:     Date
-  breed?:         string
-  isBreedUnknown: boolean
-  size?:          string
-  activityLevel:  string
-  issues:         string[]
+  name:                  string
+  gender:                string
+  ageGroup:              string
+  birthDate?:            Date
+  breed?:                string
+  isBreedUnknown:        boolean
+  size?:                 string
+  activityLevel:         string
+  activityLevelOverride?: string
+  coatColor?:            string
+  issues:                string[]
 }
 
 export class DogService {
@@ -26,14 +28,16 @@ export class DogService {
     const dog = await this.db.dog.create({
       data: {
         userId,
-        name:           input.name,
-        gender:         input.gender,
-        ageGroup:       input.ageGroup,
-        birthDate:      input.birthDate,
-        breed:          input.breed,
-        isBreedUnknown: input.isBreedUnknown,
-        size:           input.size,
-        activityLevel:  input.activityLevel,
+        name:                  input.name,
+        gender:                input.gender,
+        ageGroup:              input.ageGroup,
+        birthDate:             input.birthDate,
+        breed:                 input.breed,
+        isBreedUnknown:        input.isBreedUnknown,
+        size:                  input.size,
+        activityLevel:         input.activityLevel,
+        activityLevelOverride: input.activityLevelOverride,
+        coatColor:             input.coatColor,
         issues: {
           createMany: {
             data: input.issues.map((issue) => ({ issue })),

@@ -371,20 +371,22 @@ struct ActivityLogSheet: View {
     private var normHintText: String {
         guard let norms else { return "+\(activityType.pointValue) pts for logging honestly" }
         switch activityType {
-        case .walking:  return "Target: \(norms.walkMinPerDay) min · \(String(format: "%.1f", norms.walkDistanceKmPerDay)) km"
-        case .playing:  return "Target: \(norms.playMinPerDay) min per day"
-        case .training: return "Max \(norms.trainingMinPerSession) min per session"
-        case .feeding:  return "\(norms.feedingsPerDay)x per day recommended"
+        case .walking:     return "Target: \(norms.walkMinPerDay) min · \(String(format: "%.1f", norms.walkDistanceKmPerDay)) km"
+        case .playing:     return "Target: \(norms.playMinPerDay) min per day"
+        case .training:    return "Max \(norms.trainingMinPerSession) min per session"
+        case .feeding:     return "\(norms.feedingsPerDay)x per day recommended"
+        case .parkSession: return "Counts as walk + play"
         }
     }
 
     private var normTarget: String? {
         guard let norms else { return nil }
         switch activityType {
-        case .walking:  return "\(norms.walkMinPerDay) min"
-        case .playing:  return "\(norms.playMinPerDay) min"
-        case .training: return "≤\(norms.trainingMinPerSession) min"
-        case .feeding:  return nil
+        case .walking:     return "\(norms.walkMinPerDay) min"
+        case .playing:     return "\(norms.playMinPerDay) min"
+        case .training:    return "≤\(norms.trainingMinPerSession) min"
+        case .feeding:     return nil
+        case .parkSession: return nil
         }
     }
 

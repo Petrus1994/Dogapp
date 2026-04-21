@@ -98,6 +98,7 @@ model Dog {
   size            String?
   activityLevel         String
   activityLevelOverride String?   // per-dog personality modifier, overrides breed default
+  coatColor             String?   // drives avatar appearance
   photoUrl        String?
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())

@@ -48,6 +48,7 @@ targets:
 
           OPENAI_KEY=""
           AI_PROXY=""
+          BACKEND_URL=""
 
           while IFS= read -r line || [ -n "$line" ]; do
             [[ "$line" =~ ^[[:space:]]*# ]] && continue
@@ -55,8 +56,9 @@ targets:
             key="${line%%=*}"
             value="${line#*=}"
             case "$key" in
-              OPENAI_API_KEY)    OPENAI_KEY="$value" ;;
-              AI_PROXY_BASE_URL) AI_PROXY="$value"   ;;
+              OPENAI_API_KEY)    OPENAI_KEY="$value"   ;;
+              AI_PROXY_BASE_URL) AI_PROXY="$value"     ;;
+              BACKEND_BASE_URL)  BACKEND_URL="$value"  ;;
             esac
           done < "$ENV_FILE"
 
@@ -69,6 +71,8 @@ targets:
               <string>${OPENAI_KEY}</string>
               <key>AI_PROXY_BASE_URL</key>
               <string>${AI_PROXY}</string>
+              <key>BACKEND_BASE_URL</key>
+              <string>${BACKEND_URL}</string>
           </dict>
           </plist>
           PLISTEOF
@@ -84,6 +88,7 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         DEVELOPMENT_TEAM: ""
         SWIFT_STRICT_CONCURRENCY: minimal
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
 
 schemes:
   DogTrainerAI:

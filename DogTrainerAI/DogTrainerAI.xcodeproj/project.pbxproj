@@ -12,6 +12,7 @@
 		023F5C234DE9B341FF05F0A9 /* TaskFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59CC00E0EAB3316016E0A6CD /* TaskFeedback.swift */; };
 		05A65493B308EFB9AA3A5F49 /* ToiletEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384FF621878D8A7684B2D4D /* ToiletEvent.swift */; };
 		071076A6669E9F846A909FF7 /* BehaviorProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC2824EC64267A203B9BD7D /* BehaviorProgressView.swift */; };
+		07B2AF333C5D08E031FCAEA9 /* BackendSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EDBF84B12109F971975F83 /* BackendSyncService.swift */; };
 		0AAC5F24B5F93E691CFFBE9B /* ChallengeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D33D559F4773628FE2ACE69 /* ChallengeService.swift */; };
 		0CEF8F4298171B53844A89E4 /* AgeProgressionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86D854DD608BA5A45A59D36C /* AgeProgressionService.swift */; };
 		0E11475EC71DE1337CD0EEB8 /* TodayViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB2789352E2D18F090164127 /* TodayViewModel.swift */; };
@@ -45,6 +46,7 @@
 		347E119A4C6EC6FEAF23ADBC /* NoDogScenarioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9860E290D3448841177F0861 /* NoDogScenarioView.swift */; };
 		356499123234474381A6AFB1 /* AuthFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC025FCF9D3E363BF66AC0B1 /* AuthFlowView.swift */; };
 		368AC1534E158E4CB1681DC0 /* AIConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0311D781D5847462FCEA245B /* AIConfig.swift */; };
+		38691B72CD08C1325D4082C6 /* BreedActivityMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1C2D15267D0547EB66CBDD /* BreedActivityMapping.swift */; };
 		3A624522E2B3C1B4C9DD1AD0 /* ToiletTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E35E7835D16FBF6EE8F5198 /* ToiletTrackingService.swift */; };
 		3C642CD3E8638FC8CDE526C4 /* AgePhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8FD62676FD50127D4E58757 /* AgePhase.swift */; };
 		3CD5DB1185E41EB372BE1D42 /* QuickLogSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1671468CE24EA24DA28CD01F /* QuickLogSheet.swift */; };
@@ -81,6 +83,7 @@
 		87535D5163B4C546635CEEA2 /* BreedRecommendationIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = F009A82DF808C258BF457CAF /* BreedRecommendationIO.swift */; };
 		8960292A48DD9E8D1F5231B4 /* RealAIChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2445C95F7CB6FCD21FE495D /* RealAIChatService.swift */; };
 		89AA0B356D56DE2AE15FC4FC /* Plan.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1BA23AADE46C2B1C8CBA8FF /* Plan.swift */; };
+		89C8604738114DF0A73EA860 /* StateExplanation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78E2516275C894C2DD538392 /* StateExplanation.swift */; };
 		8A6B5539C936C56B3241B1E2 /* BreedRecommendationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50A3CDFD42E5F4B483E6EEE /* BreedRecommendationsView.swift */; };
 		8BD56A67CAF34DAE06A15F2F /* ShareableSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 381EBE9654585E53D295C932 /* ShareableSummaryView.swift */; };
 		8C1CEC8D76B8C9B376A501CE /* HasDogQuestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A838B69D31605C39569324A /* HasDogQuestionView.swift */; };
@@ -98,6 +101,7 @@
 		A62E838E4C3376E67F60C585 /* DailySummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ABB256CA3A5672B5596E1E2 /* DailySummaryView.swift */; };
 		A785A6A093C59B10F6830C4E /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BC22D1B4F66D0F69146A9E8 /* ChatViewModel.swift */; };
 		A9496B351F46DBE79AA26226 /* AIChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E620BB7D392650A6DEBE9EF /* AIChatService.swift */; };
+		AB75DF22A2F99848953DAB84 /* CoatColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 911B82A89B350F9B5F71E79F /* CoatColor.swift */; };
 		AECA502AC477A89D7D91325C /* DailyRoutine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17181FE5431AF8998BA3D6C7 /* DailyRoutine.swift */; };
 		B53DA907B17DECA2401200D6 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070C1C3134032FECFC077AD7 /* LoadingView.swift */; };
 		BF0FFF0FE4A45649E657D569 /* AIAdjustment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B654646869A4FE08B81750 /* AIAdjustment.swift */; };
@@ -105,9 +109,11 @@
 		C11342DD90625DD20ECFA186 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B72E38E6A363A8BB9357B5 /* AuthViewModel.swift */; };
 		C2FE409D57F5F8E0A551ACFB /* MockAIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E010E01513DCE9D12D881BDB /* MockAIClient.swift */; };
 		C69FCC246DF936C53C74EEA4 /* MockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E62AA562195F41329BAD2E0 /* MockData.swift */; };
+		C86839DE8D3BB5C0ABDBE831 /* SyncQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971262FD4678A1C0173265FB /* SyncQueue.swift */; };
 		C8E29EE62B515C27B68AE00B /* BreedSelectionProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4955A1543459F07829CEF1EC /* BreedSelectionProfile.swift */; };
 		CAC2C6C2DDFA574523B0706A /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C3EE992A5903381C8C8390C /* User.swift */; };
 		CBA34A52940A05FDC539F518 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F890D59F59EC8D40D5770C35 /* OnboardingViewModel.swift */; };
+		CFD46E9AB32EF9EF9EB3C233 /* DogAvatarState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B68306E9B3B77367E49893 /* DogAvatarState.swift */; };
 		D018ED2866460CF709DFB5D8 /* TaskViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D219BF31F6499F03235AD0C /* TaskViewModel.swift */; };
 		D3226068044F93C3304EEC0A /* ActivityLogSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E56C7A421CAB6879710DB0 /* ActivityLogSheet.swift */; };
 		D5382BB919EFAACC40960E8E /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD856A27A69319C443555C37 /* AuthService.swift */; };
@@ -120,6 +126,7 @@
 		E86F517F04FB541E25B988F9 /* ProgressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6076C6040F33128302EE6FB /* ProgressBarView.swift */; };
 		E9817F6888AF612D1B5AD2A5 /* ProgressEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D09CC6F75E9A46C13AACA2D /* ProgressEngine.swift */; };
 		EAD38BED7D371E28149F6F37 /* ToiletEventSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BCC9564CC0A59FCBA0DEA8 /* ToiletEventSheet.swift */; };
+		EBAE03769969C1738E641A61 /* DogAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 307E3DA95ABCE99328558410 /* DogAvatarView.swift */; };
 		ECFEE23824C92D91836C79E2 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B522EB26DC6CD7CB11362B5C /* SplashView.swift */; };
 		EE8EA423F8F52888585CB99B /* UserDefaultsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B4C13533DD95760EB38320B /* UserDefaultsManager.swift */; };
 		F3F1CD1455E3FE6FCAEE42FA /* BreedPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED4038F121ADE0654824387 /* BreedPickerView.swift */; };
@@ -147,12 +154,14 @@
 		1D33D559F4773628FE2ACE69 /* ChallengeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeService.swift; sourceTree = "<group>"; };
 		1F657A145A0D6A7080796451 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		2109D597C5C4DE427C2A60EF /* DogTrainerAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DogTrainerAIApp.swift; sourceTree = "<group>"; };
+		24B68306E9B3B77367E49893 /* DogAvatarState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DogAvatarState.swift; sourceTree = "<group>"; };
 		25302550BE0BE7C60CE5E1CA /* RealTaskFeedbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealTaskFeedbackService.swift; sourceTree = "<group>"; };
 		25B72E38E6A363A8BB9357B5 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		284580369782C3FFE1B02373 /* BreedRecommendation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreedRecommendation.swift; sourceTree = "<group>"; };
 		2AE43E5B9794C06D873EEF88 /* LiveDogStatusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveDogStatusCard.swift; sourceTree = "<group>"; };
 		2C5470C12BF03F4B164763CC /* TrainingTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingTask.swift; sourceTree = "<group>"; };
 		2E35E7835D16FBF6EE8F5198 /* ToiletTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToiletTrackingService.swift; sourceTree = "<group>"; };
+		307E3DA95ABCE99328558410 /* DogAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DogAvatarView.swift; sourceTree = "<group>"; };
 		3183649E0DD955AF127AE90C /* AdaptivePatternLearningService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptivePatternLearningService.swift; sourceTree = "<group>"; };
 		322FABE1630DE51885A74947 /* AIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIClient.swift; sourceTree = "<group>"; };
 		371BA31B0E81817B537CD412 /* AIProgressInterpreter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProgressInterpreter.swift; sourceTree = "<group>"; };
@@ -188,22 +197,26 @@
 		6F4A7499B8B87D432A08DA7A /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
 		714C549792163B4DA4C9EDD7 /* BehaviorProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorProgress.swift; sourceTree = "<group>"; };
 		7770DE13B31C743735B8960D /* BreedQuestionnaireView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreedQuestionnaireView.swift; sourceTree = "<group>"; };
+		78E2516275C894C2DD538392 /* StateExplanation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateExplanation.swift; sourceTree = "<group>"; };
 		79711F8F00FFE46438A441D6 /* PlanGenerationIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanGenerationIO.swift; sourceTree = "<group>"; };
 		7A14E8AB442135EA6A46714F /* AIResponseModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIResponseModels.swift; sourceTree = "<group>"; };
 		7A201D49F766E518D46D7C46 /* BehaviorIssueSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorIssueSheet.swift; sourceTree = "<group>"; };
 		7A82901505774FEAD4245200 /* DogState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DogState.swift; sourceTree = "<group>"; };
 		7D09CC6F75E9A46C13AACA2D /* ProgressEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressEngine.swift; sourceTree = "<group>"; };
+		7F1C2D15267D0547EB66CBDD /* BreedActivityMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreedActivityMapping.swift; sourceTree = "<group>"; };
 		7FBE5A9C74A4F817139E0407 /* StreakService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakService.swift; sourceTree = "<group>"; };
 		80663E4C3BB961ECA15B8EE3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		85457FEF25D333DC46622B72 /* ToiletPredictionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToiletPredictionService.swift; sourceTree = "<group>"; };
 		86D854DD608BA5A45A59D36C /* AgeProgressionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgeProgressionService.swift; sourceTree = "<group>"; };
 		89CFB15E6FD5E8AC00CD65A7 /* TaskFeedbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskFeedbackService.swift; sourceTree = "<group>"; };
 		8BA29EC6FE827EAEE5EFBFC6 /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
+		911B82A89B350F9B5F71E79F /* CoatColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoatColor.swift; sourceTree = "<group>"; };
 		917BFCA5849F3665B82AA3E8 /* ActivityBalanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityBalanceService.swift; sourceTree = "<group>"; };
 		91D4713101A404FF3F6350F9 /* ClarificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClarificationView.swift; sourceTree = "<group>"; };
 		9339E3A56482433A33149094 /* UserProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProgress.swift; sourceTree = "<group>"; };
 		96CEDEF3F18F2D1216015EDA /* OnboardingIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingIntroView.swift; sourceTree = "<group>"; };
 		96E56C7A421CAB6879710DB0 /* ActivityLogSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityLogSheet.swift; sourceTree = "<group>"; };
+		971262FD4678A1C0173265FB /* SyncQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncQueue.swift; sourceTree = "<group>"; };
 		982EAC79A74826CBC8AF086C /* PlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanView.swift; sourceTree = "<group>"; };
 		9860E290D3448841177F0861 /* NoDogScenarioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoDogScenarioView.swift; sourceTree = "<group>"; };
 		9B3CEEA72CC5CAC0DB281093 /* NormCalculationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NormCalculationService.swift; sourceTree = "<group>"; };
@@ -247,6 +260,7 @@
 		EF7FDE8F0F9A27F32CE119FE /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		F009A82DF808C258BF457CAF /* BreedRecommendationIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreedRecommendationIO.swift; sourceTree = "<group>"; };
 		F34FB7EB9FF75EB472602911 /* AIAdjustmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAdjustmentView.swift; sourceTree = "<group>"; };
+		F6EDBF84B12109F971975F83 /* BackendSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendSyncService.swift; sourceTree = "<group>"; };
 		F890D59F59EC8D40D5770C35 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		F8C94E7684D8E3C85380E5B3 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		F9C5CD978275FCAA849B5973 /* ContextEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextEngine.swift; sourceTree = "<group>"; };
@@ -368,11 +382,14 @@
 				4955A1543459F07829CEF1EC /* BreedSelectionProfile.swift */,
 				59F71460B839901F17E20A22 /* Challenge.swift */,
 				1F657A145A0D6A7080796451 /* ChatMessage.swift */,
+				911B82A89B350F9B5F71E79F /* CoatColor.swift */,
 				ABEDD4E639F0060E79CE9705 /* DailyActivity.swift */,
 				17181FE5431AF8998BA3D6C7 /* DailyRoutine.swift */,
+				24B68306E9B3B77367E49893 /* DogAvatarState.swift */,
 				EF1FA4BEDFD765E67442B038 /* DogProfile.swift */,
 				7A82901505774FEAD4245200 /* DogState.swift */,
 				D1BA23AADE46C2B1C8CBA8FF /* Plan.swift */,
+				78E2516275C894C2DD538392 /* StateExplanation.swift */,
 				59CC00E0EAB3316016E0A6CD /* TaskFeedback.swift */,
 				D384FF621878D8A7684B2D4D /* ToiletEvent.swift */,
 				2C5470C12BF03F4B164763CC /* TrainingTask.swift */,
@@ -421,7 +438,9 @@
 				3E620BB7D392650A6DEBE9EF /* AIChatService.swift */,
 				371BA31B0E81817B537CD412 /* AIProgressInterpreter.swift */,
 				FD856A27A69319C443555C37 /* AuthService.swift */,
+				F6EDBF84B12109F971975F83 /* BackendSyncService.swift */,
 				087DB63AFD94AC69A090C039 /* BehaviorTrackingService.swift */,
+				7F1C2D15267D0547EB66CBDD /* BreedActivityMapping.swift */,
 				0B3DE0D094912932E1885BFB /* BreedRecommendationService.swift */,
 				1D33D559F4773628FE2ACE69 /* ChallengeService.swift */,
 				F9C5CD978275FCAA849B5973 /* ContextEngine.swift */,
@@ -435,6 +454,7 @@
 				D5BF8838CB6FEBEB3289CFEA /* SignalMapper.swift */,
 				D0613B98CDDD87BA66A02C07 /* StepTrackingService.swift */,
 				7FBE5A9C74A4F817139E0407 /* StreakService.swift */,
+				971262FD4678A1C0173265FB /* SyncQueue.swift */,
 				89CFB15E6FD5E8AC00CD65A7 /* TaskFeedbackService.swift */,
 				85457FEF25D333DC46622B72 /* ToiletPredictionService.swift */,
 				2E35E7835D16FBF6EE8F5198 /* ToiletTrackingService.swift */,
@@ -491,6 +511,7 @@
 		A0B273C5887F9E2569B53C1F /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				307E3DA95ABCE99328558410 /* DogAvatarView.swift */,
 				5B5EAC49EFC9C164A812E43E /* DogStateCard.swift */,
 				070C1C3134032FECFC077AD7 /* LoadingView.swift */,
 				BE173F5E9CD45F53D77F3B1F /* PrimaryButton.swift */,
@@ -762,7 +783,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/bash\nset -euo pipefail\n\nENV_FILE=\"${SRCROOT}/.env\"\nPLIST=\"${SRCROOT}/DogTrainerAI/Resources/Secrets.plist\"\n\nif [ ! -f \"$ENV_FILE\" ]; then\n  echo \"warning: .env not found at $ENV_FILE — copy .env.example to .env and add your OpenAI key. AI features will not work until you do.\"\n  exit 0\nfi\n\nOPENAI_KEY=\"\"\nAI_PROXY=\"\"\n\nwhile IFS= read -r line || [ -n \"$line\" ]; do\n  [[ \"$line\" =~ ^[[:space:]]*# ]] && continue\n  [[ -z \"${line// }\" ]] && continue\n  key=\"${line%%=*}\"\n  value=\"${line#*=}\"\n  case \"$key\" in\n    OPENAI_API_KEY)    OPENAI_KEY=\"$value\" ;;\n    AI_PROXY_BASE_URL) AI_PROXY=\"$value\"   ;;\n  esac\ndone < \"$ENV_FILE\"\n\ncat > \"$PLIST\" << PLISTEOF\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n    <key>OPENAI_API_KEY</key>\n    <string>${OPENAI_KEY}</string>\n    <key>AI_PROXY_BASE_URL</key>\n    <string>${AI_PROXY}</string>\n</dict>\n</plist>\nPLISTEOF\n\necho \"✅ Secrets.plist updated from .env\"\n";
+			shellScript = "#!/bin/bash\nset -euo pipefail\n\nENV_FILE=\"${SRCROOT}/.env\"\nPLIST=\"${SRCROOT}/DogTrainerAI/Resources/Secrets.plist\"\n\nif [ ! -f \"$ENV_FILE\" ]; then\n  echo \"warning: .env not found at $ENV_FILE — copy .env.example to .env and add your OpenAI key. AI features will not work until you do.\"\n  exit 0\nfi\n\nOPENAI_KEY=\"\"\nAI_PROXY=\"\"\nBACKEND_URL=\"\"\n\nwhile IFS= read -r line || [ -n \"$line\" ]; do\n  [[ \"$line\" =~ ^[[:space:]]*# ]] && continue\n  [[ -z \"${line// }\" ]] && continue\n  key=\"${line%%=*}\"\n  value=\"${line#*=}\"\n  case \"$key\" in\n    OPENAI_API_KEY)    OPENAI_KEY=\"$value\"   ;;\n    AI_PROXY_BASE_URL) AI_PROXY=\"$value\"     ;;\n    BACKEND_BASE_URL)  BACKEND_URL=\"$value\"  ;;\n  esac\ndone < \"$ENV_FILE\"\n\ncat > \"$PLIST\" << PLISTEOF\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n    <key>OPENAI_API_KEY</key>\n    <string>${OPENAI_KEY}</string>\n    <key>AI_PROXY_BASE_URL</key>\n    <string>${AI_PROXY}</string>\n    <key>BACKEND_BASE_URL</key>\n    <string>${BACKEND_URL}</string>\n</dict>\n</plist>\nPLISTEOF\n\necho \"✅ Secrets.plist updated from .env\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -797,11 +818,13 @@
 				356499123234474381A6AFB1 /* AuthFlowView.swift in Sources */,
 				D5382BB919EFAACC40960E8E /* AuthService.swift in Sources */,
 				C11342DD90625DD20ECFA186 /* AuthViewModel.swift in Sources */,
+				07B2AF333C5D08E031FCAEA9 /* BackendSyncService.swift in Sources */,
 				0EF92C1C44C00C080263752C /* BehaviorEvent.swift in Sources */,
 				66FC3D4469E9D48FD1922351 /* BehaviorIssueSheet.swift in Sources */,
 				28991DC4E10E71E1B5DEDE9B /* BehaviorProgress.swift in Sources */,
 				071076A6669E9F846A909FF7 /* BehaviorProgressView.swift in Sources */,
 				71D9EAB2E324B6583A0F7257 /* BehaviorTrackingService.swift in Sources */,
+				38691B72CD08C1325D4082C6 /* BreedActivityMapping.swift in Sources */,
 				F3F1CD1455E3FE6FCAEE42FA /* BreedPickerView.swift in Sources */,
 				301E3AF8F7770B807036EDC9 /* BreedQuestionnaireView.swift in Sources */,
 				46327E78F9BEFC03C9745F39 /* BreedRecommendation.swift in Sources */,
@@ -817,12 +840,15 @@
 				5090CA169AF3EADFC37CFBA6 /* ChatView.swift in Sources */,
 				A785A6A093C59B10F6830C4E /* ChatViewModel.swift in Sources */,
 				E6A9EFDD9BB21A58B3A3605F /* ClarificationView.swift in Sources */,
+				AB75DF22A2F99848953DAB84 /* CoatColor.swift in Sources */,
 				0172A9361E690B84F93F17D8 /* ContentView.swift in Sources */,
 				68255464674132CFB86E27DA /* ContextEngine.swift in Sources */,
 				548F27042A93F7C35B23DC28 /* DailyActivity.swift in Sources */,
 				AECA502AC477A89D7D91325C /* DailyRoutine.swift in Sources */,
 				2140F3027E59FD2C367A7F51 /* DailyRoutineSection.swift in Sources */,
 				A62E838E4C3376E67F60C585 /* DailySummaryView.swift in Sources */,
+				CFD46E9AB32EF9EF9EB3C233 /* DogAvatarState.swift in Sources */,
+				EBAE03769969C1738E641A61 /* DogAvatarView.swift in Sources */,
 				6D78CEC4D9995A3DCCA43193 /* DogProfile.swift in Sources */,
 				2D167E5129284547F2C07B1F /* DogProfileView.swift in Sources */,
 				9131E89441EFF0EA6C1495C0 /* DogProfileViewModel.swift in Sources */,
@@ -872,8 +898,10 @@
 				8BD56A67CAF34DAE06A15F2F /* ShareableSummaryView.swift in Sources */,
 				9164C49053F5D08BF7158D9A /* SignalMapper.swift in Sources */,
 				ECFEE23824C92D91836C79E2 /* SplashView.swift in Sources */,
+				89C8604738114DF0A73EA860 /* StateExplanation.swift in Sources */,
 				2F91181AA6206CA7E4A23545 /* StepTrackingService.swift in Sources */,
 				2F52FD9B1A1941A1B2E512FB /* StreakService.swift in Sources */,
+				C86839DE8D3BB5C0ABDBE831 /* SyncQueue.swift in Sources */,
 				FB3D2D79265AE97FEA43D49A /* TaskCard.swift in Sources */,
 				006A7355EBB3EC0B3F945A06 /* TaskDetailView.swift in Sources */,
 				023F5C234DE9B341FF05F0A9 /* TaskFeedback.swift in Sources */,
@@ -902,6 +930,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = DogTrainerAI/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -980,6 +1009,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = DogTrainerAI/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
