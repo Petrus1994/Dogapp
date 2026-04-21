@@ -8,3 +8,6 @@ DogTrainerAI/**/*.xcuserstate
 DogTrainerAI/**/xcuserdata/
 .DS_Store
 DogTrainerAI/build/
+DogAppBackend/node_modules/
+DogAppBackend/dist/
+DogAppBackend/.env
