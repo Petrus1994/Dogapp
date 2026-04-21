@@ -1,0 +1,72 @@
+{
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/App/DogTrainerAIApp.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogTrainerAIApp.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogTrainerAIApp.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogTrainerAIApp.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogTrainerAIApp.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogTrainerAIApp.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Core/AI/Models/FeedbackAnalysisIO.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/FeedbackAnalysisIO.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/FeedbackAnalysisIO.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/FeedbackAnalysisIO.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/FeedbackAnalysisIO.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/FeedbackAnalysisIO.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Core/Models/DogProfile.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfile.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfile.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfile.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfile.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfile.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Core/Storage/KeychainManager.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/KeychainManager.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/KeychainManager.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/KeychainManager.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/KeychainManager.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/KeychainManager.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Features/Auth/Views/LoginView.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/LoginView.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/LoginView.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/LoginView.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/LoginView.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/LoginView.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Features/Main/Views/FeedbackView.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/FeedbackView.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/FeedbackView.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/FeedbackView.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/FeedbackView.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/FeedbackView.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Features/Onboarding/ViewModels/DogProfileViewModel.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfileViewModel.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfileViewModel.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfileViewModel.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfileViewModel.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfileViewModel.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Features/Onboarding/Views/DogProfileView.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfileView.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfileView.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfileView.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfileView.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/DogProfileView.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Features/Onboarding/Views/HasDogQuestionView.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/HasDogQuestionView.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/HasDogQuestionView.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/HasDogQuestionView.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/HasDogQuestionView.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/HasDogQuestionView.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Shared/Components/LoadingView.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/LoadingView.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/LoadingView.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/LoadingView.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/LoadingView.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/x86_64/LoadingView.swiftdeps"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/ContentView.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ContentView.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ContentView.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ContentView.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ContentView.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Core/AI/Models/BreedRecommendationIO.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationIO.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationIO.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationIO.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationIO.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationIO.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Core/Models/BreedSelectionProfile.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedSelectionProfile.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedSelectionProfile.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedSelectionProfile.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedSelectionProfile.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedSelectionProfile.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Core/Models/ChatMessage.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatMessage.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatMessage.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatMessage.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatMessage.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatMessage.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Core/Services/BreedRecommendationService.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationService.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationService.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationService.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationService.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationService.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Features/Chat/ViewModels/ChatViewModel.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatViewModel.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatViewModel.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatViewModel.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatViewModel.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatViewModel.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Features/Chat/Views/ChatView.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatView.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatView.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatView.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatView.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ChatView.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Features/Main/Views/ClarificationView.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ClarificationView.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ClarificationView.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ClarificationView.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ClarificationView.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/ClarificationView.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Features/Onboarding/ViewModels/BreedSelectionViewModel.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedSelectionViewModel.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedSelectionViewModel.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedSelectionViewModel.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedSelectionViewModel.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedSelectionViewModel.swiftdeps"
+  },
+  "/Users/petrus/DogTrainerAI/DogTrainerAI/Features/Onboarding/Views/BreedRecommendationsView.swift" : {
+    "const-values" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationsView.swiftconstvalues",
+    "dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationsView.d",
+    "diagnostics" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationsView.dia",
+    "object" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationsView.o",
+    "swift-dependencies" : "/Users/petrus/DogTrainerAI/build/DogTrainerAI.build/Debug-iphonesimulator/DogTrainerAI.build/Objects-normal/arm64/BreedRecommendationsView.swiftdeps"
+  }
+}

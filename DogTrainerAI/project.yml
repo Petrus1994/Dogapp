@@ -1,0 +1,102 @@
+name: DogTrainerAI
+options:
+  bundleIdPrefix: com.dogtrainer
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+targets:
+  DogTrainerAI:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: DogTrainerAI
+        excludes:
+          - "Resources/Info.plist"
+          - "Resources/Secrets.plist.example"  # example only — not compiled
+    resources:
+      - path: DogTrainerAI/Resources/Assets.xcassets
+      - path: DogTrainerAI/Resources/Secrets.plist  # git-ignored, must be present locally
+    info:
+      path: DogTrainerAI/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: PawCoach
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        NSPhotoLibraryUsageDescription: "We use your photo library to let you add a photo of your dog."
+        NSCameraUsageDescription: "We use your camera to take a photo of your dog."
+        LSRequiresIPhoneOS: true
+    preBuildScripts:
+      - name: "Inject Secrets from .env"
+        basedOnDependencyAnalysis: false
+        script: |
+          #!/bin/bash
+          set -euo pipefail
+
+          ENV_FILE="${SRCROOT}/.env"
+          PLIST="${SRCROOT}/DogTrainerAI/Resources/Secrets.plist"
+
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "warning: .env not found at $ENV_FILE — copy .env.example to .env and add your OpenAI key. AI features will not work until you do."
+            exit 0
+          fi
+
+          OPENAI_KEY=""
+          AI_PROXY=""
+
+          while IFS= read -r line || [ -n "$line" ]; do
+            [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            [[ -z "${line// }" ]] && continue
+            key="${line%%=*}"
+            value="${line#*=}"
+            case "$key" in
+              OPENAI_API_KEY)    OPENAI_KEY="$value" ;;
+              AI_PROXY_BASE_URL) AI_PROXY="$value"   ;;
+            esac
+          done < "$ENV_FILE"
+
+          cat > "$PLIST" << PLISTEOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>OPENAI_API_KEY</key>
+              <string>${OPENAI_KEY}</string>
+              <key>AI_PROXY_BASE_URL</key>
+              <string>${AI_PROXY}</string>
+          </dict>
+          </plist>
+          PLISTEOF
+
+          echo "✅ Secrets.plist updated from .env"
+
+    settings:
+      base:
+        SWIFT_VERSION: "5.9"
+        TARGETED_DEVICE_FAMILY: "1"
+        PRODUCT_BUNDLE_IDENTIFIER: com.dogtrainer.pawcoach
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        DEVELOPMENT_TEAM: ""
+        SWIFT_STRICT_CONCURRENCY: minimal
+
+schemes:
+  DogTrainerAI:
+    build:
+      targets:
+        DogTrainerAI: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

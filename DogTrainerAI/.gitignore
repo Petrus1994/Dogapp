@@ -1,0 +1,30 @@
+# Secrets — NEVER commit these
+.env
+!.env.example
+DogTrainerAI/Resources/Secrets.plist
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.xcarchive
+*.dSYM.zip
+*.dSYM
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+
+# SPM
+.build/
+.swiftpm/
+
+# CocoaPods (if used later)
+Pods/
+Podfile.lock
