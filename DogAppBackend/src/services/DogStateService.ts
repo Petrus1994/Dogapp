@@ -84,7 +84,7 @@ export class DogStateService {
 
     // --- Training level (from behavior dimensions) ---
     const avgDimScore = dimensions.length > 0
-      ? dimensions.reduce((s, d) => s + (d.currentScore ?? 50), 0) / dimensions.length
+      ? dimensions.reduce((s, d) => s + (Number(d.score) ?? 50), 0) / dimensions.length
       : 50
     const trainingLevel = Math.round(avgDimScore)
 
