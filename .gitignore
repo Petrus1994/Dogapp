@@ -2,3 +2,9 @@
 serviceAccountKey.json
 *.env
 .env*
+node_modules
+DogTrainerAI/DogTrainerAI/Resources/Secrets.plist
+DogTrainerAI/**/*.xcuserstate
+DogTrainerAI/**/xcuserdata/
+.DS_Store
+DogTrainerAI/build/
