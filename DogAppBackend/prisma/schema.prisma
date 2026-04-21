@@ -96,7 +96,8 @@ model Dog {
   breed           String?
   isBreedUnknown  Boolean   @default(false)
   size            String?
-  activityLevel   String
+  activityLevel         String
+  activityLevelOverride String?   // per-dog personality modifier, overrides breed default
   photoUrl        String?
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())

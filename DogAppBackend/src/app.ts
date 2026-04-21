@@ -13,6 +13,7 @@ import { progressRoutes }     from './routes/progress'
 import { subscriptionRoutes } from './routes/subscriptions'
 import { referralRoutes }     from './routes/referrals'
 import { notificationRoutes } from './routes/notifications'
+import { activityRoutes }     from './routes/activity'
 // Note: health routes are handled directly by the raw http server in server.ts
 
 export async function buildApp(existingServer?: Server): Promise<FastifyInstance> {
@@ -59,6 +60,7 @@ export async function buildApp(existingServer?: Server): Promise<FastifyInstance
   await app.register(subscriptionRoutes, { prefix: '/v1' })
   await app.register(referralRoutes,     { prefix: '/v1' })
   await app.register(notificationRoutes, { prefix: '/v1' })
+  await app.register(activityRoutes,     { prefix: '/v1' })
 
   return app
 }
