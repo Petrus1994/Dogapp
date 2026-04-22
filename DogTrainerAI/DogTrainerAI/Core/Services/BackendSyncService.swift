@@ -132,21 +132,6 @@ final class BackendSyncService {
         enqueue(tag: "training", endpoint: "/dogs/\(dogId)/logs/training", body: body)
     }
 
-    // MARK: - Park Session (synced as walk + play)
-
-    func syncParkSession(_ activity: DailyActivity) {
-        guard let dogId = backendDogId else { return }
-        let halfDuration = activity.durationMinutes / 2
-        let loggedAt = ISO8601DateFormatter().string(from: activity.date)
-
-        enqueue(tag: "park-walk", endpoint: "/dogs/\(dogId)/logs/walk",
-                body: WalkBody(loggedAt: loggedAt, durationMinutes: halfDuration,
-                               distanceKm: nil, walkQuality: nil, notes: activity.notes))
-        enqueue(tag: "park-play", endpoint: "/dogs/\(dogId)/logs/play",
-                body: PlayBody(loggedAt: loggedAt, durationMinutes: halfDuration,
-                               playActivity: nil, notes: activity.notes))
-    }
-
     // MARK: - Toilet event
 
     func syncToiletEvent(_ event: ToiletEvent) {

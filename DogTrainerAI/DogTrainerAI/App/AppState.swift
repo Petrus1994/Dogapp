@@ -223,9 +223,8 @@ final class AppState: ObservableObject {
         switch activity.type {
         case .walking:     BackendSyncService.shared.syncWalk(activity)
         case .feeding:     BackendSyncService.shared.syncFeeding(activity)
-        case .playing:     BackendSyncService.shared.syncPlay(activity)
-        case .training:    BackendSyncService.shared.syncTraining(activity)
-        case .parkSession: BackendSyncService.shared.syncParkSession(activity)
+        case .playing:  BackendSyncService.shared.syncPlay(activity)
+        case .training: BackendSyncService.shared.syncTraining(activity)
         }
 
         // Auto-complete the next matching routine cycle
@@ -243,10 +242,10 @@ final class AppState: ObservableObject {
         guard var routine = dailyRoutine else { return }
         let matchingPhase: CyclePhase
         switch activity.type {
-        case .walking, .parkSession: matchingPhase = .physical
-        case .playing:               matchingPhase = .physical
-        case .training:              matchingPhase = .mental
-        case .feeding:               matchingPhase = .feeding
+        case .walking:  matchingPhase = .physical
+        case .playing:  matchingPhase = .physical
+        case .training: matchingPhase = .mental
+        case .feeding:  matchingPhase = .feeding
         }
         if let idx = routine.cycles.firstIndex(where: {
             $0.phase == matchingPhase && !$0.isCompleted && !$0.skipped

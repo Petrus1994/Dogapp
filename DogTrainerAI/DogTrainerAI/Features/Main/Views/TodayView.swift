@@ -26,14 +26,13 @@ struct TodayView: View {
                 .padding(.horizontal, AppTheme.Spacing.l)
                 .padding(.top, AppTheme.Spacing.m)
 
-                // ── DOG STATE HERO (dog users only) ────────────────────
-                if let name = appState.dogProfile?.name {
+                // ── DOG AVATAR HERO (dog users only) ──────────────────
+                if let dog = appState.dogProfile {
                     let ctx = appState.currentContext
-                    DogStateHero(
-                        emoji: ctx.stateEmoji,
-                        label: ctx.stateLabel,
-                        sublabel: ctx.stateSublabel,
-                        dogName: name
+                    DogAvatarHero(
+                        dog: dog,
+                        dogState: appState.dogState,
+                        activities: appState.todayActivities
                     )
                     .padding(.horizontal, AppTheme.Spacing.l)
 
@@ -233,37 +232,246 @@ struct TodayView: View {
     }
 }
 
-// MARK: - Dog State Hero
+// MARK: - Dog Avatar Hero
 
-private struct DogStateHero: View {
-    let emoji: String
-    let label: String
-    let sublabel: String?
-    let dogName: String
+private struct DogAvatarHero: View {
+    let dog: DogProfile
+    let dogState: DogState
+    let activities: [DailyActivity]
+
+    @State private var selectedExplanation: StateExplanation? = nil
+    @State private var showSecondaryStats = false
+
+    private var avatarState: DogAvatarState { DogAvatarState.from(dogState) }
+
+    private var explanations: [StateExplanation] {
+        StateExplanation.explanations(for: dogState, dogName: dog.name, activities: activities)
+    }
+
+    private func explanation(for param: StateExplanation.Parameter) -> StateExplanation? {
+        explanations.first { $0.parameter == param }
+    }
 
     var body: some View {
-        HStack(spacing: AppTheme.Spacing.m) {
-            ZStack {
-                Circle()
-                    .fill(Color(UIColor.secondarySystemBackground))
-                    .frame(width: 64, height: 64)
-                Text(emoji)
-                    .font(.system(size: 36))
+        VStack(spacing: AppTheme.Spacing.m) {
+            // Avatar centered
+            HStack {
+                Spacer()
+                DogAvatarView(avatarState: avatarState, coatColor: dog.coatColor, size: 120)
+                Spacer()
             }
-            VStack(alignment: .leading, spacing: 3) {
-                Text(dogName)
-                    .font(AppTheme.Font.caption(13))
-                    .foregroundColor(.secondary)
-                Text(label)
+
+            // Name + state label
+            HStack(spacing: 6) {
+                Text(dog.name)
                     .font(AppTheme.Font.headline(20))
-                if let sub = sublabel {
-                    Text(sub)
-                        .font(AppTheme.Font.caption(13))
-                        .foregroundColor(.secondary)
+                Text("·")
+                    .foregroundColor(.secondary)
+                Text(avatarState.label)
+                    .font(AppTheme.Font.body(15))
+                    .foregroundColor(.secondary)
+            }
+
+            // Primary stats: Energy, Hunger, Happiness
+            VStack(spacing: AppTheme.Spacing.s) {
+                HStack(spacing: AppTheme.Spacing.s) {
+                    statCell(param: .energy,    value: dogState.energyLevel)
+                    statCell(param: .hunger,    value: dogState.hungerLevel)
+                    statCell(param: .happiness, value: dogState.satisfaction)
+                }
+
+                // Secondary stats (expandable)
+                if showSecondaryStats {
+                    HStack(spacing: AppTheme.Spacing.s) {
+                        statCell(param: .calmness,   value: dogState.calmness)
+                        statCell(param: .confidence, value: dogState.behaviorStability)
+                        statCell(param: .engagement, value: dogState.focusOnOwner)
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { showSecondaryStats.toggle() }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(showSecondaryStats ? "Less" : "More stats")
+                            .font(AppTheme.Font.caption(12))
+                        Image(systemName: showSecondaryStats ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 10))
+                    }
+                    .foregroundColor(.secondary)
                 }
             }
+            .padding(AppTheme.Spacing.m)
+            .cardStyle()
+        }
+        .sheet(item: $selectedExplanation) { exp in
+            StateExplanationSheet(explanation: exp)
+                .presentationDetents([.medium])
+        }
+    }
+
+    private func statCell(param: StateExplanation.Parameter, value: Double) -> some View {
+        Button {
+            selectedExplanation = explanation(for: param)
+        } label: {
+            VStack(spacing: 4) {
+                HStack(spacing: 3) {
+                    Text(param.icon).font(.system(size: 11))
+                    Text(param.displayName)
+                        .font(AppTheme.Font.caption(11))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+                StatBar(value: value, param: param)
+                Text(valueLabel(value, param: param))
+                    .font(AppTheme.Font.caption(10))
+                    .foregroundColor(barColor(value, param: param))
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func valueLabel(_ v: Double, param: StateExplanation.Parameter) -> String {
+        if param == .hunger {
+            switch v {
+            case 0.8...: return "Hungry"
+            case 0.5...: return "Peckish"
+            default:     return "Fed"
+            }
+        }
+        switch v {
+        case 0.75...: return "High"
+        case 0.5...:  return "Good"
+        case 0.25...: return "Low"
+        default:      return "Very low"
+        }
+    }
+
+    private func barColor(_ v: Double, param: StateExplanation.Parameter) -> Color {
+        let exp = StateExplanation(
+            parameter: param, value: v, isNormal: true, cause: "", recommendation: ""
+        )
+        switch exp.severityColor {
+        case .good:    return .green
+        case .warning: return .orange
+        case .bad:     return .red
+        }
+    }
+}
+
+private struct StatBar: View {
+    let value: Double
+    let param: StateExplanation.Parameter
+
+    private var color: Color {
+        let exp = StateExplanation(
+            parameter: param, value: value, isNormal: true, cause: "", recommendation: ""
+        )
+        switch exp.severityColor {
+        case .good:    return .green
+        case .warning: return .orange
+        case .bad:     return .red
+        }
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(Color(UIColor.tertiarySystemBackground))
+                    .frame(height: 6)
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(color)
+                    .frame(width: geo.size.width * min(value, 1.0), height: 6)
+                    .animation(.easeInOut(duration: 0.4), value: value)
+            }
+        }
+        .frame(height: 6)
+    }
+}
+
+// MARK: - State Explanation Sheet
+
+private struct StateExplanationSheet: View {
+    let explanation: StateExplanation
+
+    private var barColor: Color {
+        switch explanation.severityColor {
+        case .good:    return .green
+        case .warning: return .orange
+        case .bad:     return .red
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.l) {
+            // Header
+            HStack(spacing: AppTheme.Spacing.m) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: AppTheme.Radius.s)
+                        .fill(barColor.opacity(0.12))
+                        .frame(width: 52, height: 52)
+                    Text(explanation.parameter.icon)
+                        .font(.system(size: 26))
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(explanation.parameter.displayName)
+                        .font(AppTheme.Font.headline(18))
+                    Text(explanation.valueLabel)
+                        .font(AppTheme.Font.caption(13))
+                        .foregroundColor(barColor)
+                        .fontWeight(.medium)
+                }
+                Spacer()
+                // Mini bar
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("\(Int(explanation.value * 100))%")
+                        .font(AppTheme.Font.caption(12))
+                        .foregroundColor(.secondary)
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(Color(UIColor.tertiarySystemBackground))
+                            .frame(width: 80, height: 8)
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(barColor)
+                            .frame(width: 80 * min(explanation.value, 1.0), height: 8)
+                    }
+                }
+            }
+            .padding(AppTheme.Spacing.m)
+            .cardStyle()
+
+            // Why
+            VStack(alignment: .leading, spacing: AppTheme.Spacing.s) {
+                Label("Why this value", systemImage: "info.circle")
+                    .font(AppTheme.Font.title(14))
+                    .foregroundColor(.secondary)
+                Text(explanation.cause)
+                    .font(AppTheme.Font.body(15))
+                    .lineSpacing(4)
+            }
+            .padding(AppTheme.Spacing.m)
+            .cardStyle()
+
+            // Recommendation
+            VStack(alignment: .leading, spacing: AppTheme.Spacing.s) {
+                Label("What to do", systemImage: "lightbulb.fill")
+                    .font(AppTheme.Font.title(14))
+                    .foregroundColor(.orange)
+                Text(explanation.recommendation)
+                    .font(AppTheme.Font.body(15))
+                    .lineSpacing(4)
+            }
+            .padding(AppTheme.Spacing.m)
+            .background(Color.orange.opacity(0.06))
+            .cornerRadius(AppTheme.Radius.m)
+
             Spacer()
         }
+        .padding(AppTheme.Spacing.l)
+        .navigationTitle(explanation.parameter.displayName)
     }
 }
 

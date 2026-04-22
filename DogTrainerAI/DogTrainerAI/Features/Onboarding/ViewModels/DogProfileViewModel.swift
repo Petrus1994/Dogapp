@@ -13,11 +13,15 @@ final class DogProfileViewModel: ObservableObject {
     @Published var breed          = ""
     @Published var isBreedUnknown = false
     @Published var size           = DogProfile.DogSize.medium
-    @Published var activityLevel  = DogProfile.ActivityLevel.medium
+    @Published var coatColor      = CoatColor.golden
     @Published var selectedIssues = Set<DogProfile.DogIssue>()
     @Published var photoItem: PhotosPickerItem?
     @Published var selectedPhoto: UIImage?
     @Published var validationError: String?
+
+    var derivedActivityLevel: DogProfile.ActivityLevel {
+        isBreedUnknown ? .medium : BreedActivityMapping.activityLevel(for: breed)
+    }
 
     // Age input
     @Published var ageInputMode: AgeInputMode = .approximate
@@ -120,7 +124,8 @@ final class DogProfileViewModel: ObservableObject {
             breed: isBreedUnknown ? "Unknown / Mixed" : breed,
             isBreedUnknown: isBreedUnknown,
             size: isBreedUnknown ? size : nil,
-            activityLevel: activityLevel,
+            activityLevel: derivedActivityLevel,
+            coatColor: coatColor,
             issues: Array(selectedIssues),
             photoURL: savedPhotoURL
         )

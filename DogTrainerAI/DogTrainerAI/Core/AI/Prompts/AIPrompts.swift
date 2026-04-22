@@ -492,9 +492,6 @@ enum AIPrompts {
                     case .training:
                         let mins = done.reduce(0) { $0 + $1.durationMinutes }
                         block += "Training: \(done.count) session(s), \(mins) min total\n"
-                    case .parkSession:
-                        let mins = done.reduce(0) { $0 + $1.durationMinutes }
-                        block += "Park session: \(done.count) visit(s), \(mins) min total\n"
                     }
                 }
                 // Notes from today's activities

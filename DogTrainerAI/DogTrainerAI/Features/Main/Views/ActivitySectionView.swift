@@ -135,10 +135,6 @@ struct ActivityCard: View {
             Text("\(activity.durationMinutes) min")
                 .font(AppTheme.Font.caption(12))
                 .foregroundColor(.green)
-        case .parkSession:
-            Text("\(activity.durationMinutes) min · park")
-                .font(AppTheme.Font.caption(12))
-                .foregroundColor(.green)
         }
     }
 
@@ -179,11 +175,10 @@ struct ActivityCard: View {
     private var normHint: String? {
         guard let norms else { return nil }
         switch type {
-        case .walking:     return "Target: \(norms.walkMinPerDay) min"
-        case .playing:     return "Target: \(norms.playMinPerDay) min"
-        case .feeding:     return "\(norms.feedingsPerDay)x per day"
-        case .training:    return "≤\(norms.trainingMinPerSession) min/session"
-        case .parkSession: return "Walk + play combined"
+        case .walking:  return "Target: \(norms.walkMinPerDay) min"
+        case .playing:  return "Target: \(norms.playMinPerDay) min"
+        case .feeding:  return "\(norms.feedingsPerDay)x per day"
+        case .training: return "≤\(norms.trainingMinPerSession) min/session"
         }
     }
 
@@ -192,11 +187,10 @@ struct ActivityCard: View {
     private var normFraction: Double? {
         guard let norms else { return nil }
         switch type {
-        case .walking:     return NormCalculationService.walkCompletion(activities: activities, norms: norms)
-        case .playing:     return NormCalculationService.playCompletion(activities: activities, norms: norms)
-        case .feeding:     return NormCalculationService.feedingCompletion(activities: activities, norms: norms)
-        case .training:    return NormCalculationService.trainingCompletion(activities: activities, norms: norms)
-        case .parkSession: return NormCalculationService.walkCompletion(activities: activities, norms: norms)
+        case .walking:  return NormCalculationService.walkCompletion(activities: activities, norms: norms)
+        case .playing:  return NormCalculationService.playCompletion(activities: activities, norms: norms)
+        case .feeding:  return NormCalculationService.feedingCompletion(activities: activities, norms: norms)
+        case .training: return NormCalculationService.trainingCompletion(activities: activities, norms: norms)
         }
     }
 

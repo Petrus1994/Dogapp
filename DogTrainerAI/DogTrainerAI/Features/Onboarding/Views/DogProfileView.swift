@@ -39,8 +39,8 @@ struct DogProfileView: View {
                         }
                     }
 
-                    formSection("Activity Level") {
-                        SegmentedRow(label: "Dog's energy level", options: DogProfile.ActivityLevel.allCases, selected: $vm.activityLevel) { $0.displayName }
+                    formSection("Coat Color") {
+                        CoatColorPickerView(selected: $vm.coatColor)
                     }
 
                     formSection("Current Issues (select all that apply)") {
@@ -300,6 +300,57 @@ struct SegmentedRow<T: Hashable>: View {
                     .buttonStyle(.plain)
                 }
             }
+        }
+    }
+}
+
+struct CoatColorPickerView: View {
+    @Binding var selected: CoatColor
+
+    private let columns = [GridItem(.adaptive(minimum: 56))]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.s) {
+            Text("This colors your dog's avatar")
+                .font(AppTheme.Font.caption(12))
+                .foregroundColor(.secondary)
+                .padding(.horizontal, AppTheme.Spacing.l)
+
+            LazyVGrid(columns: columns, spacing: AppTheme.Spacing.s) {
+                ForEach(CoatColor.allCases) { color in
+                    Button {
+                        selected = color
+                    } label: {
+                        VStack(spacing: 4) {
+                            ZStack {
+                                Circle()
+                                    .fill(color.primary)
+                                    .frame(width: 40, height: 40)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(
+                                                selected == color ? AppTheme.primaryFallback : Color.clear,
+                                                lineWidth: 2.5
+                                            )
+                                            .padding(-3)
+                                    )
+                                if selected == color {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(color.needsDarkLabel ? .black.opacity(0.6) : .white)
+                                }
+                            }
+                            Text(color.displayName)
+                                .font(AppTheme.Font.caption(10))
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, AppTheme.Spacing.l)
         }
     }
 }

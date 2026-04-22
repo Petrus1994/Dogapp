@@ -35,8 +35,6 @@ struct BehaviorIssueSheet: View {
             return [.beggingForFood, .pickingFoodFromGround, .overexcitement, .toiletAccidents, .whiningOrHowling, .other]
         case .playing:
             return [.overexcitement, .jumpingOnPeople, .barking, .ignoringOwner, .chewingObjects, .fearReactions]
-        case .parkSession:
-            return [.leashPulling, .reactingToDogs, .reactingToPeople, .overexcitement, .jumpingOnPeople, .barking]
         }
     }
 
