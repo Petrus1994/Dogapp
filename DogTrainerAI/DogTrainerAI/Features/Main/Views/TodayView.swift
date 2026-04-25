@@ -67,6 +67,12 @@ struct TodayView: View {
                         .padding(.horizontal, AppTheme.Spacing.l)
                 }
 
+                // ── EMPATHY BANNER ─────────────────────────────────────
+                if let msg = appState.empathyMessage {
+                    EmpathyBanner(message: msg)
+                        .padding(.horizontal, AppTheme.Spacing.l)
+                }
+
                 // ── QUICK ACCESS ROW ───────────────────────────────────
                 HStack(spacing: AppTheme.Spacing.s) {
                     MiniActionButton(icon: "bubble.left.fill", label: "AI Coach") {
@@ -77,6 +83,9 @@ struct TodayView: View {
                     }
                     MiniActionButton(icon: "chart.line.uptrend.xyaxis", label: "Progress") {
                         router.navigateToday(to: .behaviorProgress)
+                    }
+                    MiniActionButton(icon: "calendar.badge.clock", label: "This Week") {
+                        router.navigateToday(to: .weeklySummary)
                     }
                 }
                 .padding(.horizontal, AppTheme.Spacing.l)
@@ -695,6 +704,19 @@ struct CompactBadges: View {
 
     var body: some View {
         HStack(spacing: AppTheme.Spacing.xs) {
+            // Streak shields
+            if progress.streakShields > 0 {
+                HStack(spacing: 2) {
+                    ForEach(0..<progress.streakShields, id: \.self) { _ in
+                        Text("🛡️").font(.system(size: 11))
+                    }
+                }
+                .padding(.horizontal, AppTheme.Spacing.s)
+                .padding(.vertical, 4)
+                .background(Color.blue.opacity(0.08))
+                .cornerRadius(AppTheme.Radius.s)
+            }
+
             if progress.currentStreak > 0 {
                 HStack(spacing: 4) {
                     Text("🔥").font(.system(size: 13))
@@ -749,6 +771,24 @@ struct StreakLevelBadge: View {
             .cornerRadius(AppTheme.Radius.m)
             Spacer()
         }
+    }
+}
+
+struct EmpathyBanner: View {
+    let message: String
+    var body: some View {
+        HStack(alignment: .top, spacing: AppTheme.Spacing.s) {
+            Text("💙").font(.system(size: 16))
+            Text(message)
+                .font(AppTheme.Font.body(14))
+                .foregroundColor(.primary)
+                .lineSpacing(3)
+        }
+        .padding(AppTheme.Spacing.m)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.blue.opacity(0.07))
+        .cornerRadius(AppTheme.Radius.m)
+        .overlay(RoundedRectangle(cornerRadius: AppTheme.Radius.m).stroke(Color.blue.opacity(0.18), lineWidth: 1))
     }
 }
 

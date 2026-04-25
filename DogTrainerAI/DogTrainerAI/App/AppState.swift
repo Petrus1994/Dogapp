@@ -99,6 +99,9 @@ final class AppState: ObservableObject {
         }
         userDefaultsManager.savePlan(plan)
         flow = .main
+
+        // Schedule recurring weekly summary notification
+        scheduleWeeklySummaryNotification()
     }
 
     func logout() {
@@ -184,8 +187,12 @@ final class AppState: ObservableObject {
         todayActivities.append(activity)
         ActivityTrackingService.shared.add(activity)
 
-        // Streak
+        // Streak (check if a new shield is earned)
+        let shieldsBefore = userProgress.streakShields
         StreakService.markActiveToday(progress: &userProgress)
+        if userProgress.streakShields > shieldsBefore {
+            ageProgressionAnnouncement = "🛡️ Streak shield earned! You've hit a \(userProgress.currentStreak)-day streak. Your shield is banked for emergencies."
+        }
 
         // Points for the activity
         let activityEvent = ScoringService.pointsFor(activity: activity)
@@ -437,6 +444,7 @@ final class AppState: ObservableObject {
             dogProfile: dogProfile,
             previousState: dogState
         )
+        scheduleSmartDailyNudge()
     }
 
     // MARK: - Helpers
@@ -522,6 +530,59 @@ final class AppState: ObservableObject {
     var proactiveProgressInsight: String? {
         guard let name = dogProfile?.name else { return nil }
         return AIProgressInterpreter.proactiveInsight(progress: behaviorProgress, dogName: name)
+    }
+
+    // MARK: - Empathy mode (too many tough sessions → softer coaching tone)
+
+    var empathyModeActive: Bool {
+        let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+        let toughCount = allBehaviorEvents
+            .filter { $0.date >= sevenDaysAgo && $0.hasRealIssues }
+            .count
+        return toughCount >= 4
+    }
+
+    var empathyMessage: String? {
+        guard empathyModeActive, let name = dogProfile?.name else { return nil }
+        let toughCount = allBehaviorEvents
+            .filter {
+                let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+                return $0.date >= sevenDaysAgo && $0.hasRealIssues
+            }.count
+        if toughCount >= 7 {
+            return "It's been a hard week. That's okay — showing up consistently matters more than perfection. \(name) is still learning."
+        }
+        return "Some sessions are tougher than others. Every walk and every feeding still counts for \(name)'s development."
+    }
+
+    // MARK: - Weekly summary data
+
+    var weeklyActivities: [DailyActivity] {
+        let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+        return ActivityTrackingService.shared.loadAll()
+            .filter { $0.date >= sevenDaysAgo && $0.completed }
+    }
+
+    var weeklyBehaviorEvents: [BehaviorEvent] {
+        let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+        return allBehaviorEvents.filter { $0.date >= sevenDaysAgo }
+    }
+
+    // MARK: - Smart proactive notifications
+
+    func scheduleSmartDailyNudge() {
+        guard let profile = dogProfile else { return }
+        Task {
+            await NotificationTimingService.shared.scheduleSmartDailyNudge(
+                dogState: dogState, dogName: profile.name)
+        }
+    }
+
+    func scheduleWeeklySummaryNotification() {
+        guard let profile = dogProfile else { return }
+        Task {
+            await NotificationTimingService.shared.scheduleWeeklySummaryNotification(dogName: profile.name)
+        }
     }
 
     private func awardPoints(_ points: Int) {

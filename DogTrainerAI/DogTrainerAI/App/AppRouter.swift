@@ -19,6 +19,7 @@ enum TodayRoute: Hashable {
     case dailySummary
     case challenges
     case behaviorProgress
+    case weeklySummary
 }
 
 enum MainTab: Int {

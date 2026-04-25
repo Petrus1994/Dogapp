@@ -101,6 +101,7 @@
 		A62E838E4C3376E67F60C585 /* DailySummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ABB256CA3A5672B5596E1E2 /* DailySummaryView.swift */; };
 		A785A6A093C59B10F6830C4E /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BC22D1B4F66D0F69146A9E8 /* ChatViewModel.swift */; };
 		A9496B351F46DBE79AA26226 /* AIChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E620BB7D392650A6DEBE9EF /* AIChatService.swift */; };
+		A9CD30382D8A80B0477E46F7 /* WeeklySummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A964C1B66E194A4589DE6B0 /* WeeklySummaryView.swift */; };
 		AB75DF22A2F99848953DAB84 /* CoatColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 911B82A89B350F9B5F71E79F /* CoatColor.swift */; };
 		AECA502AC477A89D7D91325C /* DailyRoutine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17181FE5431AF8998BA3D6C7 /* DailyRoutine.swift */; };
 		B53DA907B17DECA2401200D6 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070C1C3134032FECFC077AD7 /* LoadingView.swift */; };
@@ -158,6 +159,7 @@
 		25302550BE0BE7C60CE5E1CA /* RealTaskFeedbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealTaskFeedbackService.swift; sourceTree = "<group>"; };
 		25B72E38E6A363A8BB9357B5 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		284580369782C3FFE1B02373 /* BreedRecommendation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreedRecommendation.swift; sourceTree = "<group>"; };
+		2A964C1B66E194A4589DE6B0 /* WeeklySummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklySummaryView.swift; sourceTree = "<group>"; };
 		2AE43E5B9794C06D873EEF88 /* LiveDogStatusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveDogStatusCard.swift; sourceTree = "<group>"; };
 		2C5470C12BF03F4B164763CC /* TrainingTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingTask.swift; sourceTree = "<group>"; };
 		2E35E7835D16FBF6EE8F5198 /* ToiletTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToiletTrackingService.swift; sourceTree = "<group>"; };
@@ -557,6 +559,7 @@
 			children = (
 				4CC2824EC64267A203B9BD7D /* BehaviorProgressView.swift */,
 				381EBE9654585E53D295C932 /* ShareableSummaryView.swift */,
+				2A964C1B66E194A4589DE6B0 /* WeeklySummaryView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -917,6 +920,7 @@
 				CAC2C6C2DDFA574523B0706A /* User.swift in Sources */,
 				EE8EA423F8F52888585CB99B /* UserDefaultsManager.swift in Sources */,
 				DC5429B1AC623C9A61FA65A1 /* UserProgress.swift in Sources */,
+				A9CD30382D8A80B0477E46F7 /* WeeklySummaryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

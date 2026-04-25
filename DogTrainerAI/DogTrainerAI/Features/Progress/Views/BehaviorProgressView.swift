@@ -23,6 +23,27 @@ struct BehaviorProgressView: View {
                         .padding(.horizontal, AppTheme.Spacing.l)
                 }
 
+                // 7-day before/after comparison
+                SevenDayComparisonCard(progress: appState.behaviorProgress, dogName: dogName)
+                    .padding(.horizontal, AppTheme.Spacing.l)
+
+                // Weekly summary link
+                Button {
+                    // Handled by NavigationLink in TodayFlowView
+                } label: {
+                    HStack(spacing: AppTheme.Spacing.s) {
+                        Image(systemName: "calendar.badge.clock")
+                        Text("Full Weekly Review")
+                    }
+                    .font(AppTheme.Font.title(14))
+                    .frame(maxWidth: .infinity)
+                    .padding(AppTheme.Spacing.m)
+                    .background(AppTheme.primaryFallback.opacity(0.08))
+                    .foregroundColor(AppTheme.primaryFallback)
+                    .cornerRadius(AppTheme.Radius.m)
+                }
+                .padding(.horizontal, AppTheme.Spacing.l)
+
                 // 4 dimension cards
                 VStack(spacing: AppTheme.Spacing.m) {
                     ForEach(BehaviorDimension.allCases, id: \.rawValue) { dimension in
@@ -130,6 +151,81 @@ private struct ProactiveInsightCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.orange.opacity(0.07))
         .cornerRadius(AppTheme.Radius.m)
+    }
+}
+
+// MARK: - 7-Day Before/After Comparison
+
+private struct SevenDayComparisonCard: View {
+    let progress: BehaviorProgress
+    let dogName: String
+
+    private struct DimDelta {
+        let dimension: BehaviorDimension
+        let current: Double
+        let weekAgo: Double?
+        var delta: Double? { weekAgo.map { current - $0 } }
+    }
+
+    private var deltas: [DimDelta] {
+        BehaviorDimension.allCases.map { dim in
+            let score = progress[dim]
+            let weekAgoScore = score.history
+                .filter {
+                    let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+                    return $0.date <= sevenDaysAgo
+                }
+                .last?.score
+            return DimDelta(dimension: dim, current: score.score, weekAgo: weekAgoScore)
+        }
+    }
+
+    private var hasData: Bool {
+        deltas.contains { $0.weekAgo != nil }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.m) {
+            HStack {
+                Text("7-Day Change")
+                    .font(AppTheme.Font.title(15))
+                Spacer()
+                Text("vs last week")
+                    .font(AppTheme.Font.caption(12))
+                    .foregroundColor(.secondary)
+            }
+
+            if hasData {
+                ForEach(deltas, id: \.dimension.rawValue) { d in
+                    HStack(spacing: AppTheme.Spacing.m) {
+                        Text(d.dimension.icon).font(.system(size: 16)).frame(width: 22)
+                        Text(d.dimension.displayName)
+                            .font(AppTheme.Font.body(13))
+                        Spacer()
+                        if let delta = d.delta {
+                            let prefix = delta >= 0 ? "+" : ""
+                            Text("\(prefix)\(Int(delta))")
+                                .font(AppTheme.Font.title(14))
+                                .fontWeight(.semibold)
+                                .foregroundColor(delta > 1 ? .green : delta < -1 ? .red : .secondary)
+                        } else {
+                            Text("—").font(AppTheme.Font.caption(12)).foregroundColor(.secondary)
+                        }
+                        Text("\(Int(d.current))")
+                            .font(AppTheme.Font.caption(12))
+                            .foregroundColor(.secondary)
+                            .frame(width: 28, alignment: .trailing)
+                    }
+                }
+            } else {
+                Text("Keep logging for 7+ days to see how \(dogName) is changing over time.")
+                    .font(AppTheme.Font.caption(13))
+                    .foregroundColor(.secondary)
+                    .lineSpacing(3)
+            }
+        }
+        .padding(AppTheme.Spacing.m)
+        .cardStyle()
     }
 }
 

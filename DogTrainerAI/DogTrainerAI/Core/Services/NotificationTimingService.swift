@@ -86,6 +86,61 @@ final class NotificationTimingService {
         try? await UNUserNotificationCenter.current().add(request)
     }
 
+    // MARK: - Smart daily nudge (based on dog state)
+
+    func scheduleSmartDailyNudge(dogState: DogState, dogName: String) async {
+        let center = UNUserNotificationCenter.current()
+
+        // Cancel any existing smart nudge
+        center.removePendingNotificationRequests(withIdentifiers: ["smart_nudge"])
+
+        let content = UNMutableNotificationContent()
+        content.sound = .default
+
+        if dogState.energyLevel > 0.7 {
+            content.title = "🦮 \(dogName) has energy to burn"
+            content.body  = "High energy right now — a walk or play session will keep \(dogName) calm and balanced today."
+        } else if dogState.hungerLevel > 0.75 {
+            content.title = "🍖 Feeding time for \(dogName)"
+            content.body  = "It looks like \(dogName) hasn't been fed recently. Consistent meal timing builds calm food habits."
+        } else if dogState.satisfaction < 0.3 {
+            content.title = "🎾 \(dogName) needs some play"
+            content.body  = "Low satisfaction today — even 10 minutes of focused play makes a real difference."
+        } else if dogState.focusOnOwner < 0.3 {
+            content.title = "🎯 Quick training win with \(dogName)"
+            content.body  = "3–5 minutes of name recall or a simple command builds attention and connection."
+        } else {
+            return // dog is balanced — no nudge needed
+        }
+
+        // Schedule 2 hours from now
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2 * 3600, repeats: false)
+        let request = UNNotificationRequest(identifier: "smart_nudge", content: content, trigger: trigger)
+        try? await center.add(request)
+    }
+
+    // MARK: - Sunday weekly summary notification
+
+    func scheduleWeeklySummaryNotification(dogName: String) async {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: ["weekly_summary"])
+
+        let content = UNMutableNotificationContent()
+        content.title = "📊 \(dogName)'s weekly summary is ready"
+        content.body  = "See how your week went — activity stats, behavior trends, and what to focus on next."
+        content.sound = .default
+
+        // Next Sunday at 9am
+        var components = DateComponents()
+        components.weekday = 1  // Sunday
+        components.hour    = 9
+        components.minute  = 0
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        let request = UNNotificationRequest(identifier: "weekly_summary", content: content, trigger: trigger)
+        try? await center.add(request)
+    }
+
     // MARK: - Cancel all
 
     func cancelAll() {

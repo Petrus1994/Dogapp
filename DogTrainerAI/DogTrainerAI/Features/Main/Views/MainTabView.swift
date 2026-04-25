@@ -55,6 +55,8 @@ struct TodayFlowView: View {
                         ChallengesView()
                     case .behaviorProgress:
                         BehaviorProgressView()
+                    case .weeklySummary:
+                        WeeklySummaryView()
                     }
                 }
         }
