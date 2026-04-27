@@ -32,6 +32,32 @@ const rawServer = createServer((req, res) => {
     return
   }
 
+  // /health/storage — non-secret storage config diagnostic (temporary)
+  if (url === '/health/storage') {
+    const bucket        = process.env.STORAGE_BUCKET        ?? '(not set)'
+    const endpoint      = process.env.STORAGE_ENDPOINT      ?? '(not set)'
+    const publicBaseUrl = process.env.STORAGE_PUBLIC_BASE_URL ?? '(not set)'
+    const region        = process.env.STORAGE_REGION        ?? 'auto'
+    const sampleKey     = 'avatars/test-sample.png'
+    const samplePublicUrl = publicBaseUrl !== '(not set)'
+      ? `${publicBaseUrl.replace(/\/$/, '')}/${sampleKey}`
+      : endpoint !== '(not set)'
+        ? `${endpoint.replace(/\/$/, '')}/${bucket}/${sampleKey}`
+        : `https://${bucket}.s3.${region}.amazonaws.com/${sampleKey}`
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({
+      bucket,
+      endpoint,
+      publicBaseUrl,
+      region,
+      sampleKey,
+      samplePublicUrl,
+      accessKeyConfigured: (process.env.STORAGE_ACCESS_KEY ?? 'not-configured') !== 'not-configured',
+      secretKeyConfigured: (process.env.STORAGE_SECRET_KEY ?? 'not-configured') !== 'not-configured',
+    }))
+    return
+  }
+
   // Forward to Fastify once loaded, otherwise 503
   if (fastifyHandler) {
     fastifyHandler(req, res)
