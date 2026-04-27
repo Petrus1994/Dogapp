@@ -480,10 +480,25 @@ final class AppState: ObservableObject {
                                                                   currentPattern: adaptivePattern)
         userDefaultsManager.saveAdaptivePattern(adaptivePattern)
 
+        // Mark the current toilet routine cycle done so ContextEngine stops prompting
+        autoCompleteToiletCycle()
+
         refreshToiletState()
         refreshDogState()
 
         BackendSyncService.shared.syncToiletEvent(event)
+    }
+
+    private func autoCompleteToiletCycle() {
+        guard var routine = dailyRoutine else { return }
+        if let idx = routine.cycles.firstIndex(where: {
+            $0.phase == .toilet && !$0.isCompleted && !$0.skipped
+        }) {
+            routine.cycles[idx].isCompleted = true
+            routine.cycles[idx].completedAt = Date()
+            dailyRoutine = routine
+            userDefaultsManager.saveDailyRoutine(routine)
+        }
     }
 
     func refreshToiletState() {
@@ -782,6 +797,22 @@ final class AppState: ObservableObject {
         refreshDailyRoutine()
         refreshToiletState()
         BackendSyncService.shared.setBackendDogId(userDefaultsManager.loadBackendDogId())
+    }
+
+    func switchToFutureDog() {
+        guard futureDogProfile != nil, !isFutureDogMode else { return }
+        // Save current real dog before leaving its context
+        if let profile = dogProfile {
+            userDefaultsManager.upsertDogProfile(profile)
+        }
+        // Clearing dogProfile activates future dog mode (isFutureDogMode = futureDogProfile != nil && dogProfile == nil)
+        dogProfile    = nil
+        currentPlan   = nil
+        todayActivities   = []
+        allBehaviorEvents = []
+        dailyRoutine      = nil
+        toiletPrediction  = nil
+        refreshDogState()
     }
 
     private func awardPoints(_ points: Int) {

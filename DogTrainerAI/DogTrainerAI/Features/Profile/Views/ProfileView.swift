@@ -38,16 +38,26 @@ struct ProfileView: View {
                 Section("Your Dogs") {
                     ForEach(dogs) { dog in
                         VStack(spacing: 0) {
-                            if dog.type == .real, !activeDog(dog),
-                               let profile = appState.dogProfile(for: dog.id) {
-                                Button {
-                                    appState.switchActiveDog(to: profile)
-                                } label: {
+                            if !activeDog(dog) {
+                                if dog.type == .real, let profile = appState.dogProfile(for: dog.id) {
+                                    Button {
+                                        appState.switchActiveDog(to: profile)
+                                    } label: {
+                                        DogEntityRow(dog: dog, isActive: false)
+                                    }
+                                    .buttonStyle(.plain)
+                                } else if dog.type == .future {
+                                    Button {
+                                        appState.switchToFutureDog()
+                                    } label: {
+                                        DogEntityRow(dog: dog, isActive: false)
+                                    }
+                                    .buttonStyle(.plain)
+                                } else {
                                     DogEntityRow(dog: dog, isActive: false)
                                 }
-                                .buttonStyle(.plain)
                             } else {
-                                DogEntityRow(dog: dog, isActive: activeDog(dog))
+                                DogEntityRow(dog: dog, isActive: true)
                             }
 
                             if dog.type == .real && dog.subscriptionStatus != .premium {
@@ -77,32 +87,28 @@ struct ProfileView: View {
                         .padding(.vertical, AppTheme.Spacing.s)
                     }
 
-                    // Add Real Dog
-                    if appState.dogProfile == nil {
-                        Button {
-                            appState.currentUser?.scenarioType = .hasDog
-                            router.onboardingPath = NavigationPath()
-                            router.onboardingPath.append(OnboardingRoute.hasDogQuestion)
-                            router.onboardingPath.append(OnboardingRoute.dogProfile)
-                            appState.flow = .onboarding
-                        } label: {
-                            Label("Add Real Dog", systemImage: "plus.circle.fill")
-                                .foregroundColor(AppTheme.primaryFallback)
-                                .font(AppTheme.Font.body(14))
-                        }
+                    // Add Real Dog — always available
+                    Button {
+                        appState.currentUser?.scenarioType = .hasDog
+                        router.onboardingPath = NavigationPath()
+                        router.onboardingPath.append(OnboardingRoute.hasDogQuestion)
+                        router.onboardingPath.append(OnboardingRoute.dogProfile)
+                        appState.flow = .onboarding
+                    } label: {
+                        Label("Add Real Dog", systemImage: "plus.circle.fill")
+                            .foregroundColor(AppTheme.primaryFallback)
+                            .font(AppTheme.Font.body(14))
                     }
 
-                    // Add Virtual Dog
-                    if appState.futureDogProfile == nil {
-                        Button {
-                            router.onboardingPath = NavigationPath()
-                            router.onboardingPath.append(OnboardingRoute.futureDogSetup)
-                            appState.flow = .onboarding
-                        } label: {
-                            Label("Add Virtual Dog", systemImage: "plus.circle")
-                                .foregroundColor(.purple)
-                                .font(AppTheme.Font.body(14))
-                        }
+                    // Add Virtual Dog — always available
+                    Button {
+                        router.onboardingPath = NavigationPath()
+                        router.onboardingPath.append(OnboardingRoute.futureDogSetup)
+                        appState.flow = .onboarding
+                    } label: {
+                        Label("Add Virtual Dog", systemImage: "plus.circle")
+                            .foregroundColor(.purple)
+                            .font(AppTheme.Font.body(14))
                     }
                 }
 
