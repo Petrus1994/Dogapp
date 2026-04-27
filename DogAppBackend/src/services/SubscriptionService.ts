@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import { Errors } from '../lib/errors'
 import { logger } from '../lib/logger'
 import { todayDate } from '../utils/dates'
+import { ReferralService } from './ReferralService'
 
 export class SubscriptionService {
   constructor(private db: PrismaClient) {}
@@ -51,6 +52,11 @@ export class SubscriptionService {
         data: { userId, eventType: 'purchased', tierBefore: 'free', tierAfter: 'premium' },
       }),
     ])
+
+    // Trigger referral reward for inviter (fire-and-forget — never fail the payment)
+    new ReferralService(this.db).onPaymentCompleted(userId).catch(err =>
+      logger.warn({ err, userId }, 'referral reward hook failed')
+    )
 
     return sub
   }

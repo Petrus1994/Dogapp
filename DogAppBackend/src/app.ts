@@ -1,6 +1,7 @@
 import Fastify, { FastifyInstance } from 'fastify'
-import cors    from '@fastify/cors'
-import helmet  from '@fastify/helmet'
+import cors       from '@fastify/cors'
+import helmet     from '@fastify/helmet'
+import multipart  from '@fastify/multipart'
 import { Server, IncomingMessage, ServerResponse } from 'http'
 import { AppError } from './lib/errors'
 
@@ -14,6 +15,9 @@ import { subscriptionRoutes } from './routes/subscriptions'
 import { referralRoutes }     from './routes/referrals'
 import { notificationRoutes } from './routes/notifications'
 import { activityRoutes }     from './routes/activity'
+import { avatarRoutes }       from './routes/avatar'
+import { futureDogRoutes }    from './routes/futureDog'
+import { voiceRoutes }        from './routes/voice'
 // Note: health routes are handled directly by the raw http server in server.ts
 
 export async function buildApp(existingServer?: Server): Promise<FastifyInstance> {
@@ -31,6 +35,11 @@ export async function buildApp(existingServer?: Server): Promise<FastifyInstance
 
   // Security headers
   await app.register(helmet, { global: true })
+
+  // Multipart (for photo uploads)
+  await app.register(multipart, {
+    limits: { fileSize: 10 * 1024 * 1024, files: 3 }, // 10MB per file, 3 files
+  })
 
   // CORS
   await app.register(cors, {
@@ -61,6 +70,9 @@ export async function buildApp(existingServer?: Server): Promise<FastifyInstance
   await app.register(referralRoutes,     { prefix: '/v1' })
   await app.register(notificationRoutes, { prefix: '/v1' })
   await app.register(activityRoutes,     { prefix: '/v1' })
+  await app.register(avatarRoutes,       { prefix: '/v1' })
+  await app.register(futureDogRoutes,    { prefix: '/v1' })
+  await app.register(voiceRoutes,        { prefix: '/v1' })
 
   return app
 }

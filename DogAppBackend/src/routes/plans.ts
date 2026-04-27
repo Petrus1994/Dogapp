@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { requireAuth } from '../middleware/auth'
 import { PlanService } from '../services/PlanService'
+import { PlanAdaptationService } from '../services/PlanAdaptationService'
 import { prisma } from '../lib/prisma'
 import { openai } from '../lib/openai'
 
@@ -19,8 +20,11 @@ const TaskUpdateBody = z.object({
   notes:  z.string().optional(),
 })
 
+const SimplifyBody = z.object({ planId: z.string() })
+
 export async function planRoutes(app: FastifyInstance) {
-  const svc = new PlanService(prisma, openai)
+  const svc        = new PlanService(prisma, openai)
+  const adaptation = new PlanAdaptationService(prisma)
 
   app.post('/dogs/:dogId/plans/generate', { preHandler: requireAuth }, async (req, reply) => {
     const { dogId } = req.params as { dogId: string }
@@ -48,6 +52,35 @@ export async function planRoutes(app: FastifyInstance) {
     const { taskId } = req.params as { taskId: string }
     const body       = FeedbackBody.parse(req.body)
     const feedback   = await svc.submitFeedback(req.user.userId, body.dogId ?? null, taskId, body)
+
+    // Trigger plan adaptation asynchronously — does not block response
+    const task = await prisma.trainingTask.findUnique({ where: { id: taskId } })
+    if (task) {
+      adaptation.adaptAfterFeedback(task.planId, taskId, body.result).catch(() => {})
+    }
+
     return reply.code(201).send(feedback)
+  })
+
+  // POST /v1/plans/simplify — user accepts "life's been busy" offer
+  app.post('/plans/simplify', { preHandler: requireAuth }, async (req, reply) => {
+    const { planId } = SimplifyBody.parse(req.body)
+    const updated    = await adaptation.simplifyPlan(req.user.userId, planId)
+    return reply.code(200).send(updated)
+  })
+
+  // GET /v1/plans/:planId/adaptation-status — iOS polls to show/hide simplify banner
+  app.get('/plans/:planId/adaptation-status', { preHandler: requireAuth }, async (req) => {
+    const { planId } = req.params as { planId: string }
+    const plan = await prisma.trainingPlan.findFirst({
+      where: { id: planId, userId: req.user.userId },
+      select: { skippedTaskCount: true, simplifiedAt: true, lastAdaptedAt: true },
+    })
+    return {
+      skippedTaskCount:    plan?.skippedTaskCount ?? 0,
+      offerSimplification: (plan?.skippedTaskCount ?? 0) >= 5 && !plan?.simplifiedAt,
+      simplifiedAt:        plan?.simplifiedAt ?? null,
+      lastAdaptedAt:       plan?.lastAdaptedAt ?? null,
+    }
   })
 }
