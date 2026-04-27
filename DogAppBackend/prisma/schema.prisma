@@ -728,12 +728,14 @@ model AiUsage {
 model FutureDogProfile {
   id               String    @id @default(cuid())
   userId           String    @unique
+  dogName          String?                          // user-chosen name for their future dog
   preferredBreed   String?
   lifestyle        String    @default("moderate")  // active | moderate | calm
   homeType         String    @default("apartment")  // apartment | house_small | house_large | rural
   timeAvailability String    @default("moderate")   // low | moderate | high
   expectedSize     String?                          // small | medium | large
   preparationStage String    @default("exploring")  // exploring | committed | ready
+  avatarUrl        String?                          // AI-generated portrait URL
   transformedAt    DateTime?                        // set when user gets real dog — profile is kept for AI context
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt

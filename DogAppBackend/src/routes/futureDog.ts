@@ -8,6 +8,7 @@ import { openai } from '../lib/openai'
 import { Errors } from '../lib/errors'
 
 const ProfileBody = z.object({
+  dogName:          z.string().optional(),
   preferredBreed:   z.string().optional(),
   lifestyle:        z.enum(['active', 'moderate', 'calm']),
   homeType:         z.enum(['apartment', 'house_small', 'house_large', 'rural']),
@@ -149,5 +150,16 @@ export async function futureDogRoutes(app: FastifyInstance) {
     const transitionContext = await learning.buildTransitionContext(fdProfile.id)
 
     return { transformed: true, transitionContext }
+  })
+
+  // ─── Avatar ───────────────────────────────────────────────────────────────
+
+  app.patch('/future-dog/profile/avatar', { preHandler: requireAuth }, async (req) => {
+    const { avatarUrl } = z.object({ avatarUrl: z.string().url() }).parse(req.body)
+    const profile = await prisma.futureDogProfile.update({
+      where: { userId: req.user.userId },
+      data:  { avatarUrl },
+    })
+    return profile
   })
 }
