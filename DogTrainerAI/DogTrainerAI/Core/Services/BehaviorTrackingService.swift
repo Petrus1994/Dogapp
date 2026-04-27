@@ -2,8 +2,28 @@ import Foundation
 
 final class BehaviorTrackingService {
     static let shared = BehaviorTrackingService()
-    private let key = "behavior_events_v1"
+    private let legacyKey = "behavior_events_v1"
+    private var dogId: String?
     private init() {}
+
+    private var key: String {
+        guard let dogId else { return legacyKey }
+        return "behavior_events_v1_\(dogId)"
+    }
+
+    func configure(dogId: String) {
+        let isNew = self.dogId != dogId
+        self.dogId = dogId
+        if isNew { migrateLegacyIfNeeded(dogId: dogId) }
+    }
+
+    private func migrateLegacyIfNeeded(dogId: String) {
+        let perDogKey = "behavior_events_v1_\(dogId)"
+        guard UserDefaults.standard.data(forKey: perDogKey) == nil,
+              let legacyData = UserDefaults.standard.data(forKey: legacyKey) else { return }
+        UserDefaults.standard.set(legacyData, forKey: perDogKey)
+        UserDefaults.standard.removeObject(forKey: legacyKey)
+    }
 
     func saveAll(_ events: [BehaviorEvent]) {
         if let data = try? JSONEncoder().encode(events) {
@@ -26,7 +46,6 @@ final class BehaviorTrackingService {
         saveAll(all)
     }
 
-    // Returns the most frequent issues over the last N days, sorted by count descending
     func frequentIssues(lastDays: Int = 14) -> [(BehaviorEvent.BehaviorIssue, Int)] {
         let cutoff = Calendar.current.date(byAdding: .day, value: -lastDays, to: Date()) ?? Date()
         let events = loadAll().filter { $0.date >= cutoff }
@@ -39,7 +58,6 @@ final class BehaviorTrackingService {
         return counts.sorted { $0.value > $1.value }
     }
 
-    // Days (as date-only strings) where real issues were reported
     func daysWithIssues() -> Set<String> {
         let fmt = DateFormatter()
         fmt.dateFormat = "yyyy-MM-dd"

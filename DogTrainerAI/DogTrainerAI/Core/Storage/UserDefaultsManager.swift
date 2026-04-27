@@ -18,6 +18,9 @@ final class UserDefaultsManager {
         static let lastKnownPhaseId    = "last_known_phase_id"
         static let behaviorProgress    = "behavior_progress_v1"
         static let backendDogId        = "backend_dog_id"
+        // Multi-dog Phase 2
+        static let allDogProfiles      = "all_dog_profiles_v2"
+        static let activeDogId         = "active_dog_id_v2"
     }
 
     var onboardingCompleted: Bool {
@@ -127,6 +130,57 @@ final class UserDefaultsManager {
 
     func loadBackendDogId() -> String? {
         defaults.string(forKey: Keys.backendDogId)
+    }
+
+    // MARK: - Multi-dog Phase 2
+
+    func saveAllDogProfiles(_ profiles: [DogProfile]) {
+        if let data = try? JSONEncoder().encode(profiles) {
+            defaults.set(data, forKey: Keys.allDogProfiles)
+        }
+    }
+
+    func loadAllDogProfiles() -> [DogProfile] {
+        guard let data = defaults.data(forKey: Keys.allDogProfiles),
+              let profiles = try? JSONDecoder().decode([DogProfile].self, from: data)
+        else { return [] }
+        return profiles
+    }
+
+    func upsertDogProfile(_ profile: DogProfile) {
+        var all = loadAllDogProfiles()
+        if let idx = all.firstIndex(where: { $0.id == profile.id }) {
+            all[idx] = profile
+        } else {
+            all.append(profile)
+        }
+        saveAllDogProfiles(all)
+    }
+
+    func removeDogProfile(id: String) {
+        let all = loadAllDogProfiles().filter { $0.id != id }
+        saveAllDogProfiles(all)
+    }
+
+    func saveActiveDogId(_ id: String?) {
+        if let id { defaults.set(id, forKey: Keys.activeDogId) }
+        else { defaults.removeObject(forKey: Keys.activeDogId) }
+    }
+
+    func loadActiveDogId() -> String? {
+        defaults.string(forKey: Keys.activeDogId)
+    }
+
+    // Per-dog namespaced plan storage
+    func savePlan(_ plan: Plan, forDogId dogId: String) {
+        if let data = try? JSONEncoder().encode(plan) {
+            defaults.set(data, forKey: "current_plan_\(dogId)")
+        }
+    }
+
+    func loadPlan(forDogId dogId: String) -> Plan? {
+        guard let data = defaults.data(forKey: "current_plan_\(dogId)") else { return nil }
+        return try? JSONDecoder().decode(Plan.self, from: data)
     }
 
     func clearAll() {

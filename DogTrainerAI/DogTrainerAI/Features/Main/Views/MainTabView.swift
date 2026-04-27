@@ -6,8 +6,14 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $router.selectedTab) {
-            TodayFlowView()
-                .tabItem { Label("Today", systemImage: "sun.max.fill") }
+            Group {
+                if appState.isFutureDogMode {
+                    FutureDogHomeView()
+                } else {
+                    TodayFlowView()
+                }
+            }
+                .tabItem { Label(appState.isFutureDogMode ? "Prepare" : "Today", systemImage: appState.isFutureDogMode ? "books.vertical.fill" : "sun.max.fill") }
                 .tag(MainTab.today)
 
             PlanView()
@@ -22,7 +28,41 @@ struct MainTabView: View {
                 .tabItem { Label("Profile", systemImage: "person.fill") }
                 .tag(MainTab.profile)
         }
-        .tint(AppTheme.primaryFallback)
+        .tint(AppTheme.primaryFallback)  // warm orange
+        .sheet(isPresented: $router.showTrialActivation) {
+            TrialActivationView()
+        }
+        .sheet(isPresented: $router.showPaywall) {
+            PaywallView(trigger: router.paywallTrigger, dogId: router.paywallDogId)
+        }
+        .onAppear {
+            let sub = SubscriptionService.shared
+            if !sub.hasSeenTrialModal {
+                sub.hasSeenTrialModal = true
+                router.showTrialActivation = true
+            }
+        }
+        .sheet(isPresented: $appState.showAvatarSetupPrompt) {
+            DogAvatarSetupView()
+                .environmentObject(appState)
+                .environmentObject(router)
+        }
+        .sheet(isPresented: $router.showReferralSheet) {
+            ReferralView()
+        }
+        .sheet(isPresented: $router.showTransformationFlow) {
+            TransformationView()
+                .environmentObject(appState)
+                .environmentObject(router)
+        }
+        // Activity-specific chat sheet — accessible from anywhere in the app
+        .sheet(isPresented: $router.showActivityChat) {
+            if let type = router.activityChatType {
+                ActivityChatView(activityType: type)
+                    .environmentObject(appState)
+                    .environmentObject(router)
+            }
+        }
     }
 }
 

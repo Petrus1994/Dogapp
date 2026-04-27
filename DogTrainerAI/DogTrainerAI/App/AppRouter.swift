@@ -4,11 +4,16 @@ import SwiftUI
 enum OnboardingRoute: Hashable {
     case hasDogQuestion
     case dogProfile
+    case avatarReveal
+    case problemIdentification
+    case instantAICoach
+    case avatarSetup
     case noDogScenario
     case breedQuestionnaire
     case breedRecommendations
     case breedPicker
     case planGeneration
+    case futureDogSetup
 }
 
 enum TodayRoute: Hashable {
@@ -49,6 +54,27 @@ final class AppRouter: ObservableObject {
     @Published var quickLogLinkedTaskId: String?
     @Published var showQuickLog = false
 
+    // Voice quick log
+    @Published var showVoiceLog = false
+
+    // Activity-specific chat
+    @Published var showActivityChat = false
+    @Published var activityChatType: DailyActivity.ActivityType? = nil
+    // Pre-loads a message into the activity chat input on open (e.g. from notification)
+    @Published var pendingActivityChatMessage: String? = nil
+
+    // Referral sheet
+    @Published var showReferralSheet = false
+
+    // Paywall + trial activation
+    @Published var showPaywall: Bool = false
+    @Published var paywallTrigger: String? = nil
+    @Published var paywallDogId: String? = nil
+    @Published var showTrialActivation: Bool = false
+
+    // Future Dog transformation flow
+    @Published var showTransformationFlow = false
+
     // Toast feedback
     @Published var toastMessage: String?
 
@@ -85,6 +111,24 @@ final class AppRouter: ObservableObject {
 
     func showChat() {
         selectedTab = .chat
+    }
+
+    func openActivityChat(type: DailyActivity.ActivityType, preloadedMessage: String? = nil) {
+        activityChatType          = type
+        pendingActivityChatMessage = preloadedMessage
+        showActivityChat          = true
+    }
+
+    // Called when a push notification is tapped — routes to correct screen
+    func routeFromNotification(_ route: String) {
+        switch route {
+        case "feeding":  openActivityChat(type: .feeding)
+        case "walking":  openActivityChat(type: .walking)
+        case "playing":  openActivityChat(type: .playing)
+        case "training": openActivityChat(type: .training)
+        case "ai_insight": selectedTab = .chat
+        default:         selectedTab = .today
+        }
     }
 
     // Called when user taps an activity card

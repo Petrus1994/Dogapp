@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import StoreKit
 
 enum AppFlow {
     case splash
@@ -34,10 +35,58 @@ final class AppState: ObservableObject {
     // MARK: - Behavioral progress system
     @Published var behaviorProgress: BehaviorProgress = .initial
 
+    // MARK: - Avatar system
+    @Published var currentAvatarState: DogAvatarState = .calm
+    @Published var avatarStateReason: String?
+    @Published var avatarRecommendedAction: String?
+    @Published var showAvatarSetupPrompt: Bool = false
+
+    // MARK: - Voice → Chat handoff
+    @Published var pendingChatInput: String? = nil
+
+    // MARK: - Subscription gate
+    var isPaidSubscriber: Bool { SubscriptionService.shared.status == .premium }
+
+    // Multi-dog Phase 2: persists all dog profiles; switching reloads all dog-specific state.
+    var dogs: [DogEntity] {
+        var entities: [DogEntity] = []
+        let sub = SubscriptionService.shared
+        guard let userId = currentUser?.id else { return entities }
+        let storedProfiles = userDefaultsManager.loadAllDogProfiles()
+        let profilesToShow = storedProfiles.isEmpty ? [dogProfile].compactMap { $0 } : storedProfiles
+        for profile in profilesToShow {
+            let dogStatus = sub.subscriptionStatus(for: profile.id)
+            entities.append(DogEntity.from(profile, userId: userId, subscriptionStatus: dogStatus))
+        }
+        if let profile = futureDogProfile {
+            let name = profile.preferredBreed ?? "Future Dog"
+            let dogStatus = sub.subscriptionStatus(for: profile.id)
+            entities.append(DogEntity.fromFuture(profile, userId: userId, name: name, subscriptionStatus: dogStatus))
+        }
+        return entities
+    }
+
+    var activeDogId: String? { dogProfile?.id }
+
+    // MARK: - Future Dog Mode
+    @Published var futureDogProfile: FutureDogProfile?
+    @Published var learningProfile: UserLearningProfile?
+    @Published var showTransformation: Bool = false
+
+    var isFutureDogMode: Bool { futureDogProfile != nil && dogProfile == nil }
+
+    // MARK: - Referral system
+    @Published var referralInfo: ReferralInfo?
+    @Published var showReferralPrompt: Bool = false       // inline prompt trigger
+    @Published var pendingReferralCode: String?           // code from deep link, applied post-login
+
     private let sessionManager = SessionManager()
     private let userDefaultsManager = UserDefaultsManager.shared
+    private var subscriptionCancellable: AnyCancellable?
 
     init() {
+        subscriptionCancellable = SubscriptionService.shared.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
         Task { await bootstrap() }
     }
 
@@ -49,8 +98,24 @@ final class AppState: ObservableObject {
         if sessionManager.isAuthenticated,
            let user = userDefaultsManager.loadUser() {
             currentUser = user
-            dogProfile  = userDefaultsManager.loadDogProfile()
-            currentPlan = userDefaultsManager.loadPlan()
+
+            // Multi-dog: resolve active dog from persisted map or legacy single slot
+            let allProfiles = userDefaultsManager.loadAllDogProfiles()
+            let savedActiveDogId = userDefaultsManager.loadActiveDogId()
+            if let profile = allProfiles.first(where: { $0.id == savedActiveDogId }) ?? allProfiles.first {
+                dogProfile = profile
+            } else if let legacy = userDefaultsManager.loadDogProfile() {
+                dogProfile = legacy
+                userDefaultsManager.upsertDogProfile(legacy)
+                userDefaultsManager.saveActiveDogId(legacy.id)
+            }
+
+            if let profile = dogProfile {
+                configureDogServices(dogId: profile.id)
+                currentPlan = userDefaultsManager.loadPlan(forDogId: profile.id) ?? userDefaultsManager.loadPlan()
+            } else {
+                currentPlan = userDefaultsManager.loadPlan()
+            }
 
             // Load coaching system
             userProgress      = userDefaultsManager.loadUserProgress() ?? .initial
@@ -72,6 +137,8 @@ final class AppState: ObservableObject {
             refreshDailyRoutine()
             refreshToiletState()
             checkAgeProgression()
+            refreshReferralInfo()
+            await refreshFutureDogState()
 
             flow = user.onboardingCompleted ? .main : .onboarding
         } else {
@@ -87,6 +154,9 @@ final class AppState: ObservableObject {
         currentUser = user
         userDefaultsManager.saveUser(user)
         flow = user.onboardingCompleted ? .main : .onboarding
+        Task { await SubscriptionService.shared.start() }
+        applyPendingReferralCode()
+        refreshReferralInfo()
     }
 
     func completeOnboarding(plan: Plan) {
@@ -95,13 +165,53 @@ final class AppState: ObservableObject {
         if let user = currentUser { userDefaultsManager.saveUser(user) }
         if let profile = dogProfile {
             userDefaultsManager.saveDogProfile(profile)
+            userDefaultsManager.upsertDogProfile(profile)
+            userDefaultsManager.saveActiveDogId(profile.id)
+            userDefaultsManager.savePlan(plan, forDogId: profile.id)
+            configureDogServices(dogId: profile.id)
             BackendSyncService.shared.syncDogProfile(profile)
+        } else {
+            userDefaultsManager.savePlan(plan)
         }
-        userDefaultsManager.savePlan(plan)
         flow = .main
 
         // Schedule recurring weekly summary notification
         scheduleWeeklySummaryNotification()
+
+        // Prompt avatar setup if not already generated
+        if dogProfile?.avatarGenerationStatus == .none || dogProfile?.avatarGenerationStatus == .failed {
+            showAvatarSetupPrompt = true
+        }
+    }
+
+    // MARK: - Avatar state sync (called from refreshDogState)
+
+    func refreshAvatarState() {
+        let state = DogAvatarState.from(dogState)
+        currentAvatarState = state
+        guard let dogId = UserDefaultsManager.shared.loadBackendDogId() else { return }
+        Task {
+            let result = try? await AvatarAPIClient.shared.reportAvatarState(
+                dogId: dogId,
+                dogState: DogStateSyncBody(
+                    energyLevel:             dogState.energyLevel,
+                    hungerLevel:             dogState.hungerLevel,
+                    satisfaction:            dogState.satisfaction,
+                    calmness:                dogState.calmness,
+                    focusOnOwner:            dogState.focusOnOwner,
+                    recentActivityCompleted: todayActivities.contains { $0.completed },
+                    missedActivitiesCount:   todayActivities.filter { !$0.completed }.count,
+                    recentTrainingSuccess:   nil,
+                    recentBehaviorIssues:    weeklyBehaviorEvents.filter { $0.hasRealIssues }.count,
+                    streakActive:            userProgress.currentStreak > 0
+                )
+            )
+            if let result {
+                currentAvatarState       = DogAvatarState.from(backendState: result.state)
+                avatarStateReason        = result.stateReason
+                avatarRecommendedAction  = result.recommendedCopy
+            }
+        }
     }
 
     func logout() {
@@ -130,6 +240,8 @@ final class AppState: ObservableObject {
         behaviorProgress      = .initial
         NotificationTimingService.shared.cancelAll()
         ToiletTrackingService.shared.clear()
+        ActivityChatViewModel.clearAll()
+        DogMemory.clear()
         flow = .auth
     }
 
@@ -173,6 +285,10 @@ final class AppState: ObservableObject {
         // Anti-cheat tracking
         if feedback.result == .success {
             userProgress.consecutiveSuccessCount += 1
+            // Trigger referral prompt after every 3rd success (show once per session)
+            if userProgress.consecutiveSuccessCount % 3 == 0 {
+                showReferralPrompt = true
+            }
         } else {
             userProgress.consecutiveSuccessCount = 0
         }
@@ -241,6 +357,15 @@ final class AppState: ObservableObject {
         if activity.type == .feeding, let name = dogProfile?.name {
             Task {
                 await NotificationTimingService.shared.scheduleToiletReminderAfterFeeding(dogName: name)
+            }
+        }
+
+        // Schedule activity follow-up notification (Part 8 — smart follow-up)
+        if let name = dogProfile?.name {
+            Task {
+                await NotificationTimingService.shared.scheduleActivityFollowUp(
+                    activityType: activity.type, dogName: name
+                )
             }
         }
     }
@@ -424,6 +549,7 @@ final class AppState: ObservableObject {
             AgeProgressionService.syncAgeGroup(profile: &updatedProfile)
             dogProfile = updatedProfile
             userDefaultsManager.saveDogProfile(updatedProfile)
+            userDefaultsManager.upsertDogProfile(updatedProfile)
         }
     }
 
@@ -445,6 +571,7 @@ final class AppState: ObservableObject {
             previousState: dogState
         )
         scheduleSmartDailyNudge()
+        refreshAvatarState()
     }
 
     // MARK: - Helpers
@@ -563,6 +690,10 @@ final class AppState: ObservableObject {
             .filter { $0.date >= sevenDaysAgo && $0.completed }
     }
 
+    var allActivities: [DailyActivity] {
+        ActivityTrackingService.shared.loadAll().filter { $0.completed }
+    }
+
     var weeklyBehaviorEvents: [BehaviorEvent] {
         let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
         return allBehaviorEvents.filter { $0.date >= sevenDaysAgo }
@@ -583,6 +714,68 @@ final class AppState: ObservableObject {
         Task {
             await NotificationTimingService.shared.scheduleWeeklySummaryNotification(dogName: profile.name)
         }
+    }
+
+    // MARK: - Future Dog
+
+    func refreshFutureDogState() async {
+        guard dogProfile == nil else { return }
+        futureDogProfile = try? await FutureDogAPIClient.shared.fetchProfile()
+        if futureDogProfile != nil {
+            learningProfile = try? await FutureDogAPIClient.shared.fetchLearning()
+        }
+    }
+
+    func completeFutureDogOnboarding(profile: FutureDogProfile) {
+        futureDogProfile = profile
+        currentUser?.scenarioType = .futureDog
+        if let user = currentUser { userDefaultsManager.saveUser(user) }
+        flow = .main
+    }
+
+    // MARK: - Referral
+
+    func refreshReferralInfo() {
+        Task {
+            referralInfo = try? await ReferralAPIClient.shared.fetchMyInfo()
+        }
+    }
+
+    func applyPendingReferralCode() {
+        guard let code = pendingReferralCode else { return }
+        pendingReferralCode = nil
+        Task {
+            try? await ReferralAPIClient.shared.applyCode(code)
+            refreshReferralInfo()
+        }
+    }
+
+    // MARK: - Multi-dog Phase 2
+
+    func dogProfile(for id: String) -> DogProfile? {
+        userDefaultsManager.loadAllDogProfiles().first { $0.id == id }
+    }
+
+    private func configureDogServices(dogId: String) {
+        ActivityTrackingService.shared.configure(dogId: dogId)
+        BehaviorTrackingService.shared.configure(dogId: dogId)
+        DogMemory.configure(dogId: dogId)
+    }
+
+    func switchActiveDog(to profile: DogProfile) {
+        guard profile.id != dogProfile?.id else { return }
+        dogProfile = profile
+        userDefaultsManager.saveActiveDogId(profile.id)
+        userDefaultsManager.saveDogProfile(profile)
+        configureDogServices(dogId: profile.id)
+        currentPlan       = userDefaultsManager.loadPlan(forDogId: profile.id) ?? userDefaultsManager.loadPlan()
+        todayActivities   = ActivityTrackingService.shared.todayActivities()
+        allBehaviorEvents = BehaviorTrackingService.shared.loadAll()
+        behaviorProgress  = userDefaultsManager.loadBehaviorProgress() ?? .initial
+        refreshDogState()
+        refreshDailyRoutine()
+        refreshToiletState()
+        BackendSyncService.shared.setBackendDogId(userDefaultsManager.loadBackendDogId())
     }
 
     private func awardPoints(_ points: Int) {

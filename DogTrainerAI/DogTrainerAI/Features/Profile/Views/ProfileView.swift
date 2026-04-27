@@ -4,114 +4,167 @@ struct ProfileView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var router: AppRouter
     @StateObject private var vm = ProfileViewModel()
+    @ObservedObject private var sub = SubscriptionService.shared
     @State private var dogPhoto: UIImage?
 
     var body: some View {
         NavigationStack {
             List {
-                // Progress section
-                Section(header: Text("Your Progress"), footer: Text("Points track how consistently and honestly you train. They don't unlock anything — they reflect real effort.").font(.caption).foregroundColor(.secondary)) {
-                    // Level
-                    HStack(spacing: AppTheme.Spacing.m) {
-                        Text(appState.userProgress.level.icon).font(.system(size: 24))
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(appState.userProgress.level.displayName)
-                                .font(AppTheme.Font.title(15))
-                            if let next = appState.userProgress.level.nextLevel {
-                                Text("\(appState.userProgress.pointsToNextLevel) pts to \(next.displayName)")
+                // Account
+                Section("Account") {
+                    profileRow(icon: "envelope.fill", label: "Email", value: appState.currentUser?.email ?? "—")
+                }
+
+                // Your Dogs (always visible dog management section)
+                let dogs = appState.dogs
+                Section("Your Dogs") {
+                    ForEach(dogs) { dog in
+                        VStack(spacing: 0) {
+                            if dog.type == .real, !activeDog(dog),
+                               let profile = appState.dogProfile(for: dog.id) {
+                                Button {
+                                    appState.switchActiveDog(to: profile)
+                                } label: {
+                                    DogEntityRow(dog: dog, isActive: false)
+                                }
+                                .buttonStyle(.plain)
+                            } else {
+                                DogEntityRow(dog: dog, isActive: activeDog(dog))
+                            }
+
+                            if dog.type == .real && dog.subscriptionStatus != .premium {
+                                Button {
+                                    router.paywallDogId    = dog.id
+                                    router.paywallTrigger  = "per_dog_upgrade"
+                                    router.showPaywall     = true
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "star.fill")
+                                            .font(.system(size: 11))
+                                        Text("Upgrade \(dog.name) to Premium")
+                                            .font(AppTheme.Font.caption(12))
+                                            .fontWeight(.medium)
+                                    }
+                                    .foregroundColor(AppTheme.primaryFallback)
+                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, AppTheme.Spacing.m)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(AppTheme.primaryFallback.opacity(0.05))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .listRowInsets(EdgeInsets())
+                        .padding(.horizontal, AppTheme.Spacing.m)
+                        .padding(.vertical, AppTheme.Spacing.s)
+                    }
+
+                    // Add Real Dog
+                    if appState.dogProfile == nil {
+                        Button {
+                            appState.currentUser?.scenarioType = .hasDog
+                            router.onboardingPath = NavigationPath()
+                            router.onboardingPath.append(OnboardingRoute.hasDogQuestion)
+                            router.onboardingPath.append(OnboardingRoute.dogProfile)
+                            appState.flow = .onboarding
+                        } label: {
+                            Label("Add Real Dog", systemImage: "plus.circle.fill")
+                                .foregroundColor(AppTheme.primaryFallback)
+                                .font(AppTheme.Font.body(14))
+                        }
+                    }
+
+                    // Add Future Dog
+                    if appState.futureDogProfile == nil {
+                        Button {
+                            router.onboardingPath = NavigationPath()
+                            router.onboardingPath.append(OnboardingRoute.futureDogSetup)
+                            appState.flow = .onboarding
+                        } label: {
+                            Label("Add Future Dog", systemImage: "plus.circle")
+                                .foregroundColor(.purple)
+                                .font(AppTheme.Font.body(14))
+                        }
+                    }
+                }
+
+                // Subscription
+                Section("Subscription") {
+                    HStack {
+                        Text(sub.status.icon)
+                            .font(.system(size: 16))
+                        Text(sub.status.displayName)
+                            .foregroundColor(.primary)
+                        Spacer()
+                        if sub.status == .trial {
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text("\(sub.trialDaysRemaining)d remaining")
                                     .font(AppTheme.Font.caption(12))
                                     .foregroundColor(.secondary)
-                            } else {
-                                Text("Maximum level reached")
-                                    .font(AppTheme.Font.caption(12))
+                                Text("\(sub.trialAIRemaining) AI chats left")
+                                    .font(AppTheme.Font.caption(11))
                                     .foregroundColor(.secondary)
                             }
                         }
-                        Spacer()
-                        Text("\(appState.userProgress.totalPoints) pts")
-                            .font(AppTheme.Font.title(14))
-                            .foregroundColor(AppTheme.primaryFallback)
                     }
-                    .padding(.vertical, AppTheme.Spacing.xs)
-
-                    // Level progress bar
-                    VStack(alignment: .leading, spacing: 4) {
-                        ProgressBarView(
-                            progress: appState.userProgress.progressToNextLevel,
-                            color: AppTheme.primaryFallback
-                        )
-                        .frame(height: 6)
-                    }
-
-                    // Streak
-                    HStack {
-                        Text("🔥").font(.system(size: 18))
-                        Text("Current streak")
-                        Spacer()
-                        Text("\(appState.userProgress.currentStreak) days")
-                            .foregroundColor(.orange)
-                            .fontWeight(.medium)
-                    }
-
-                    HStack {
-                        Text("🏅").font(.system(size: 18))
-                        Text("Best streak")
-                        Spacer()
-                        Text("\(appState.userProgress.longestStreak) days")
-                            .foregroundColor(.secondary)
-                    }
-
-                    // Challenges link
-                    NavigationLink(destination: ChallengesView()) {
-                        HStack {
-                            Text("🎯").font(.system(size: 18))
-                            Text("Challenges")
-                            Spacer()
-                            let done = appState.challenges.filter { $0.isCompleted }.count
-                            Text("\(done)/\(appState.challenges.count) done")
-                                .foregroundColor(.secondary)
-                                .font(AppTheme.Font.body(14))
-                        }
-                    }
-
-                    // Leaderboard link
-                    NavigationLink(destination: LeaderboardView()) {
-                        HStack {
-                            Text("🏆").font(.system(size: 18))
-                            Text("Leaderboard")
-                            Spacer()
-                            Text("#\(leaderboardRank) of 16")
-                                .foregroundColor(.secondary)
-                                .font(AppTheme.Font.body(14))
-                        }
-                    }
-
-                    // Behavior progress
-                    if appState.dogProfile != nil {
-                        NavigationLink(destination: BehaviorProgressView()) {
-                            HStack {
-                                Text("📈").font(.system(size: 18))
-                                Text("Behavior Progress")
+                    if sub.status != .premium {
+                        Button {
+                            router.showPaywall = true
+                            router.paywallTrigger = "profile"
+                        } label: {
+                            HStack(spacing: AppTheme.Spacing.m) {
+                                Image(systemName: "star.fill")
+                                    .foregroundColor(AppTheme.primaryFallback)
+                                    .frame(width: 20)
+                                Text("Upgrade to Premium")
+                                    .foregroundColor(AppTheme.primaryFallback)
+                                    .font(AppTheme.Font.body())
                                 Spacer()
-                                let improving = appState.behaviorProgress.scores
-                                    .filter { $0.trend == .improving && $0.confidence > 20 }.count
-                                if improving > 0 {
-                                    Text("\(improving) improving")
-                                        .foregroundColor(.green)
-                                        .font(AppTheme.Font.body(14))
-                                } else {
-                                    Text("View report")
-                                        .foregroundColor(.secondary)
-                                        .font(AppTheme.Font.body(14))
-                                }
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
                             }
                         }
                     }
                 }
 
-                // Account
-                Section("Account") {
-                    profileRow(icon: "envelope.fill", label: "Email", value: appState.currentUser?.email ?? "—")
+                // Training streak
+                if appState.userProgress.currentStreak > 0 || appState.userProgress.longestStreak > 0 {
+                    Section("Training Streak") {
+                        HStack {
+                            Text("🔥").font(.system(size: 18))
+                            Text("Current streak")
+                            Spacer()
+                            Text("\(appState.userProgress.currentStreak) days")
+                                .foregroundColor(.orange)
+                                .fontWeight(.medium)
+                        }
+                        HStack {
+                            Text("🏅").font(.system(size: 18))
+                            Text("Best streak")
+                            Spacer()
+                            Text("\(appState.userProgress.longestStreak) days")
+                                .foregroundColor(.secondary)
+                        }
+                        if appState.userProgress.streakShields > 0 {
+                            HStack {
+                                Text("🛡️").font(.system(size: 18))
+                                Text("Streak shields")
+                                Spacer()
+                                Text("\(appState.userProgress.streakShields)/3")
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        if appState.dogProfile != nil {
+                            NavigationLink(destination: BehaviorProgressView()) {
+                                HStack {
+                                    Text("📈").font(.system(size: 18))
+                                    Text("Behavior Progress")
+                                    Spacer()
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // Dog
@@ -136,29 +189,44 @@ struct ProfileView: View {
                         if !dog.issues.isEmpty {
                             profileRow(icon: "🎯", label: "Focus areas", value: dog.issues.map { $0.displayName }.joined(separator: ", "), isEmoji: true)
                         }
+                    }
+                }
+
+                // Future Dog Mode section
+                if appState.isFutureDogMode, let fdProfile = appState.futureDogProfile {
+                    Section("Future Dog Preparation") {
+                        if let breed = fdProfile.preferredBreed {
+                            profileRow(icon: "🐾", label: "Preparing for", value: breed, isEmoji: true)
+                        }
+                        profileRow(icon: "🏠", label: "Home", value: fdProfile.homeType.label, isEmoji: true)
+                        profileRow(icon: "⚡️", label: "Lifestyle", value: fdProfile.lifestyle.label, isEmoji: true)
+                        let readiness = appState.learningProfile.map { Int(($0.overallReadinessScore * 100).rounded()) } ?? 0
+                        let completed = appState.learningProfile?.scenariosCompleted ?? 0
+                        profileRow(icon: "📊", label: "Readiness", value: "\(readiness)%", isEmoji: true)
+                        profileRow(icon: "✅", label: "Scenarios done", value: "\(completed)", isEmoji: true)
+                    }
+
+                    Section {
                         Button {
-                            router.onboardingPath = NavigationPath()
-                            router.onboardingPath.append(OnboardingRoute.hasDogQuestion)
-                            router.onboardingPath.append(OnboardingRoute.dogProfile)
-                            appState.flow = .onboarding
+                            router.showTransformationFlow = true
                         } label: {
-                            Label("Edit dog profile", systemImage: "pencil")
-                                .foregroundColor(AppTheme.primaryFallback)
-                                .font(AppTheme.Font.body(14))
+                            HStack(spacing: AppTheme.Spacing.m) {
+                                Text("🎉").font(.system(size: 20))
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("I got my dog!")
+                                        .foregroundColor(AppTheme.primaryFallback)
+                                        .font(AppTheme.Font.body())
+                                    Text("Transfer your preparation to your real dog's training")
+                                        .font(AppTheme.Font.caption())
+                                        .foregroundColor(.secondary)
+                                }
+                            }
                         }
                     }
                 }
 
-                // Plan
-                if let plan = appState.currentPlan {
-                    Section("Current Plan") {
-                        profileRow(icon: "list.clipboard.fill", label: "Plan", value: plan.title)
-                        profileRow(icon: "chart.bar.fill", label: "Progress", value: "\(Int(plan.progressFraction * 100))% complete")
-                    }
-                }
-
                 // No-dog scenario
-                if appState.dogProfile == nil, let scenario = appState.currentUser?.scenarioType {
+                if appState.dogProfile == nil && !appState.isFutureDogMode, let scenario = appState.currentUser?.scenarioType {
                     Section("Your Scenario") {
                         profileRow(icon: "info.circle.fill", label: "Mode", value: scenarioName(scenario))
                         if let breed = appState.selectedBreed {
@@ -185,6 +253,38 @@ struct ProfileView: View {
                     }
                 }
 
+                // Referral
+                Section {
+                    Button {
+                        router.showReferralSheet = true
+                    } label: {
+                        HStack(spacing: AppTheme.Spacing.m) {
+                            Image(systemName: "gift.fill")
+                                .foregroundColor(AppTheme.primaryFallback)
+                                .frame(width: 20)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Invite Friends, Earn Premium")
+                                    .foregroundColor(.primary)
+                                    .font(AppTheme.Font.body())
+                                if let info = appState.referralInfo, info.successfulReferrals > 0 {
+                                    Text("\(info.successfulReferrals) friend\(info.successfulReferrals == 1 ? "" : "s") subscribed · \(info.totalRewardDaysEarned) days earned")
+                                        .font(AppTheme.Font.caption(12))
+                                        .foregroundColor(.secondary)
+                                } else {
+                                    Text("Earn free Premium for every friend who subscribes")
+                                        .font(AppTheme.Font.caption(12))
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, AppTheme.Spacing.xs)
+                    }
+                }
+
                 // Logout
                 Section {
                     Button(role: .destructive) {
@@ -202,6 +302,8 @@ struct ProfileView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.appBackground.ignoresSafeArea())
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.large)
             .task {
@@ -252,13 +354,12 @@ struct ProfileView: View {
         }
     }
 
-    private var leaderboardRank: Int {
-        let entries = LeaderboardEntry.mockEntries(
-            userPoints: appState.userProgress.totalPoints,
-            userLevel: appState.userProgress.level,
-            userStreak: appState.userProgress.currentStreak
-        )
-        return (entries.firstIndex { $0.isCurrentUser } ?? 0) + 1
+    private func activeDog(_ entity: DogEntity) -> Bool {
+        if entity.type == .real {
+            return entity.id == appState.dogProfile?.id
+        } else {
+            return appState.isFutureDogMode && entity.id == appState.futureDogProfile?.id
+        }
     }
 
     private func scenarioName(_ scenario: User.ScenarioType) -> String {
@@ -267,6 +368,59 @@ struct ProfileView: View {
         case .noDogChoosingBreed: return "Choosing a breed"
         case .noDogBreedSelected: return "Breed selected"
         case .noDogSkipped:       return "General prep"
+        case .futureDog:          return "Future Dog Mode"
+        }
+    }
+}
+
+// MARK: - Dog Entity Row
+
+private struct DogEntityRow: View {
+    let dog: DogEntity
+    let isActive: Bool
+
+    var body: some View {
+        HStack(spacing: AppTheme.Spacing.m) {
+            ZStack {
+                Circle()
+                    .fill(dog.type == .future ? Color.purple.opacity(0.12) : AppTheme.primaryFallback.opacity(0.12))
+                    .frame(width: 40, height: 40)
+                Text(dog.type.icon)
+                    .font(.system(size: 20))
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(dog.name)
+                        .font(AppTheme.Font.body())
+                        .fontWeight(isActive ? .semibold : .regular)
+                    Text(dog.type.displayName)
+                        .font(AppTheme.Font.caption(10))
+                        .foregroundColor(dog.type == .future ? .purple : AppTheme.primaryFallback)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background((dog.type == .future ? Color.purple : AppTheme.primaryFallback).opacity(0.1))
+                        .cornerRadius(4)
+                }
+                if let breed = dog.breed {
+                    Text(breed)
+                        .font(AppTheme.Font.caption(12))
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 3) {
+                Text(dog.subscriptionStatus.icon)
+                    .font(.system(size: 14))
+                if isActive {
+                    Text("Active")
+                        .font(AppTheme.Font.caption(10))
+                        .foregroundColor(.green)
+                        .fontWeight(.medium)
+                }
+            }
         }
     }
 }
