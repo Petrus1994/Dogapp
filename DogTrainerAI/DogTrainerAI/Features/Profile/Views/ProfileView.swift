@@ -6,6 +6,7 @@ struct ProfileView: View {
     @StateObject private var vm = ProfileViewModel()
     @ObservedObject private var sub = SubscriptionService.shared
     @State private var dogPhoto: UIImage?
+    @State private var selectedLanguage = UserDefaultsManager.shared.preferredLanguage
 
     var body: some View {
         NavigationStack {
@@ -13,6 +14,23 @@ struct ProfileView: View {
                 // Account
                 Section("Account") {
                     profileRow(icon: "envelope.fill", label: "Email", value: appState.currentUser?.email ?? "—")
+                    HStack {
+                        Image(systemName: "globe")
+                            .foregroundColor(AppTheme.primaryFallback)
+                            .frame(width: 20)
+                        Text("Language")
+                            .foregroundColor(.primary)
+                        Spacer()
+                        Picker("", selection: $selectedLanguage) {
+                            ForEach(UserDefaultsManager.supportedLanguages, id: \.self) { lang in
+                                Text(lang).tag(lang)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .onChange(of: selectedLanguage) { _, newLang in
+                            UserDefaultsManager.shared.preferredLanguage = newLang
+                        }
+                    }
                 }
 
                 // Your Dogs (always visible dog management section)
@@ -74,14 +92,14 @@ struct ProfileView: View {
                         }
                     }
 
-                    // Add Future Dog
+                    // Add Virtual Dog
                     if appState.futureDogProfile == nil {
                         Button {
                             router.onboardingPath = NavigationPath()
                             router.onboardingPath.append(OnboardingRoute.futureDogSetup)
                             appState.flow = .onboarding
                         } label: {
-                            Label("Add Future Dog", systemImage: "plus.circle")
+                            Label("Add Virtual Dog", systemImage: "plus.circle")
                                 .foregroundColor(.purple)
                                 .font(AppTheme.Font.body(14))
                         }
@@ -156,10 +174,10 @@ struct ProfileView: View {
                             }
                         }
                         if appState.dogProfile != nil {
-                            NavigationLink(destination: BehaviorProgressView()) {
+                            NavigationLink(destination: WeeklySummaryView()) {
                                 HStack {
                                     Text("📈").font(.system(size: 18))
-                                    Text("Behavior Progress")
+                                    Text("Review Progress")
                                     Spacer()
                                 }
                             }

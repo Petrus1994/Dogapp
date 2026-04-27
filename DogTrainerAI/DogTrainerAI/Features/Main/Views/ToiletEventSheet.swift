@@ -48,7 +48,7 @@ struct ToiletEventSheet: View {
                     TextField("e.g. right after walk, outside spot", text: $notes, axis: .vertical)
                         .font(AppTheme.Font.body(15))
                         .padding(AppTheme.Spacing.m)
-                        .background(Color(UIColor.secondarySystemBackground))
+                        .background(AppTheme.cardBackground)
                         .cornerRadius(AppTheme.Radius.m)
                         .padding(.horizontal, AppTheme.Spacing.l)
                         .lineLimit(3)
@@ -110,7 +110,7 @@ struct ToiletEventSheet: View {
                     .lineSpacing(2)
             }
             .padding(AppTheme.Spacing.m)
-            .background(Color(UIColor.secondarySystemBackground))
+            .background(AppTheme.cardBackground)
             .cornerRadius(AppTheme.Radius.s)
         }
     }
@@ -131,17 +131,37 @@ struct ToiletEventSheet: View {
             return Int(Date().timeIntervalSince(lastSleepEnd) / 60)
         }()
 
+        let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
         let event = ToiletEvent(
             id: UUID().uuidString,
             date: Date(),
             outcome: selectedOutcome,
             minutesAfterLastFeeding: minutesAfterFeeding,
             minutesAfterLastSleep: minutesAfterSleep,
-            notes: notes.trimmingCharacters(in: .whitespacesAndNewlines)
+            notes: trimmedNotes
         )
         appState.logToiletEvent(event)
-        router.toastMessage = "Toilet logged ✓"
         isPresented = false
+
+        if selectedOutcome == .accident || selectedOutcome == .prompted {
+            let dogName = appState.dogProfile?.name ?? "my dog"
+            let issueDetail: String
+            if selectedOutcome == .accident {
+                issueDetail = trimmedNotes.isEmpty
+                    ? "\(dogName) had a toilet accident just now."
+                    : "\(dogName) had a toilet accident: \(trimmedNotes)"
+            } else {
+                issueDetail = trimmedNotes.isEmpty
+                    ? "\(dogName) didn't go when taken outside just now."
+                    : "\(dogName) didn't go when taken outside: \(trimmedNotes)"
+            }
+            appState.pendingChatInput = issueDetail + " What should I do?"
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                router.showChat()
+            }
+        } else {
+            router.toastMessage = "Toilet logged ✓"
+        }
     }
 }
 
@@ -164,7 +184,7 @@ private struct OutcomeButton: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, AppTheme.Spacing.m)
-            .background(isSelected ? color.opacity(0.12) : Color(UIColor.secondarySystemBackground))
+            .background(isSelected ? color.opacity(0.12) : AppTheme.cardBackground)
             .cornerRadius(AppTheme.Radius.m)
             .overlay(
                 RoundedRectangle(cornerRadius: AppTheme.Radius.m)

@@ -58,7 +58,7 @@ struct MainTabView: View {
         // Activity-specific chat sheet — accessible from anywhere in the app
         .sheet(isPresented: $router.showActivityChat) {
             if let type = router.activityChatType {
-                ActivityChatView(activityType: type)
+                ActivityChatView(activityType: type, dogId: appState.dogProfile?.id)
                     .environmentObject(appState)
                     .environmentObject(router)
             }
@@ -94,7 +94,7 @@ struct TodayFlowView: View {
                     case .challenges:
                         ChallengesView()
                     case .behaviorProgress:
-                        BehaviorProgressView()
+                        WeeklySummaryView()
                     case .weeklySummary:
                         WeeklySummaryView()
                     }

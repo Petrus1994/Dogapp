@@ -10,10 +10,10 @@ enum BehaviorDimension: String, Codable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .foodBehavior:       return "Food Behavior"
-        case .activityExcitement: return "Activity & Excitement"
-        case .ownerContact:       return "Owner Contact"
-        case .socialization:      return "Socialization"
+        case .foodBehavior:       return "Nutrition"
+        case .activityExcitement: return "Activity"
+        case .ownerContact:       return "Bond"
+        case .socialization:      return "Training"
         }
     }
 
@@ -21,34 +21,34 @@ enum BehaviorDimension: String, Codable, CaseIterable {
         switch self {
         case .foodBehavior:       return "🍖"
         case .activityExcitement: return "⚡"
-        case .ownerContact:       return "🤝"
-        case .socialization:      return "🌍"
+        case .ownerContact:       return "❤️"
+        case .socialization:      return "🧠"
         }
     }
 
     var goalState: String {
         switch self {
         case .foodBehavior:
-            return "Calm, controlled, respectful eating"
+            return "Calm, controlled, healthy eating habits"
         case .activityExcitement:
-            return "Well-exercised, emotionally balanced, controllable"
+            return "Well-exercised, emotionally balanced"
         case .ownerContact:
-            return "Strong connection and focus on owner"
+            return "Strong connection and trust with owner"
         case .socialization:
-            return "Calm, confident, socially stable"
+            return "Consistent, focused training progress"
         }
     }
 
     var shortDescription: String {
         switch self {
         case .foodBehavior:
-            return "Calmness around food, impulse control, no stealing"
+            return "Feeding quality, calmness around food, regularity"
         case .activityExcitement:
-            return "Physical activity, energy release, emotional control"
+            return "Physical activity, energy release, emotional balance"
         case .ownerContact:
-            return "Eye contact, attention, responsiveness, engagement"
+            return "Owner focus, responsiveness, bonding quality"
         case .socialization:
-            return "Behavior around people, dogs, and new environments"
+            return "Training consistency, skill retention, task completion"
         }
     }
 }

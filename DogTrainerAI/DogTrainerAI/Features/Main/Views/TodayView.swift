@@ -7,18 +7,18 @@ struct TodayView: View {
     @EnvironmentObject var router: AppRouter
     @StateObject private var vm = TodayViewModel()
 
-    @AppStorage("today_tasks_expanded") private var showTasks = false
-
     var body: some View {
         ScrollView {
             VStack(spacing: AppTheme.Spacing.l) {
 
                 // ── HEADER ─────────────────────────────────────────────
                 HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(vm.buildGreeting(userName: appState.currentUser?.email))
                             .font(AppTheme.Font.body(15))
                             .foregroundColor(.secondary)
+                        ModePill(isFutureDogMode: appState.isFutureDogMode,
+                                 dogName: appState.dogProfile?.name ?? appState.futureDogProfile?.preferredBreed)
                     }
                     Spacer()
                     CompactBadges(progress: appState.userProgress)
@@ -73,22 +73,22 @@ struct TodayView: View {
                         .padding(.horizontal, AppTheme.Spacing.l)
                 }
 
-                // ── QUICK ACCESS ROW ───────────────────────────────────
-                HStack(spacing: AppTheme.Spacing.s) {
-                    MiniActionButton(icon: "bubble.left.fill", label: "AI Coach") {
-                        router.showChat()
+                // ── REFERRAL PROMPT ────────────────────────────────────
+                if appState.showReferralPrompt {
+                    ReferralPromptCard(trigger: .afterSuccess) {
+                        appState.showReferralPrompt = false
                     }
-                    MiniActionButton(icon: "list.bullet.clipboard", label: "Full Plan") {
-                        router.selectedTab = .plan
-                    }
-                    MiniActionButton(icon: "chart.line.uptrend.xyaxis", label: "Progress") {
-                        router.navigateToday(to: .behaviorProgress)
-                    }
-                    MiniActionButton(icon: "calendar.badge.clock", label: "This Week") {
-                        router.navigateToday(to: .weeklySummary)
-                    }
+                    .padding(.horizontal, AppTheme.Spacing.l)
+                } else if appState.referralInfo?.successfulReferrals == 0 && appState.userProgress.totalPoints > 20 {
+                    ReferralPromptCard(trigger: .afterInsight)
+                        .padding(.horizontal, AppTheme.Spacing.l)
                 }
-                .padding(.horizontal, AppTheme.Spacing.l)
+
+                // ── DAILY ACTIVITIES ───────────────────────────────────
+                if appState.dogProfile != nil {
+                    ActivitySectionView()
+                }
+
 
                 // ── ANTI-CHEAT ─────────────────────────────────────────
                 if let message = appState.antiCheatMessage {
@@ -100,22 +100,9 @@ struct TodayView: View {
                 if appState.completedFullDayToday {
                     FullDayCelebrationCard()
                         .padding(.horizontal, AppTheme.Spacing.l)
-                }
-
-                // ── DAILY ACTIVITIES ───────────────────────────────────
-                if appState.dogProfile != nil {
-                    ActivitySectionView()
-                }
-
-                // ── COLLAPSIBLE: TRAINING TASKS ───────────────────────
-                if appState.currentPlan != nil {
-                    CollapsibleSection(
-                        title: trainingTasksTitle,
-                        isExpanded: $showTasks
-                    ) {
-                        taskList
-                    }
-                    .padding(.horizontal, AppTheme.Spacing.l)
+                } else if appState.hasTodayActivityData, appState.dogProfile != nil {
+                    RemainingActivityHint()
+                        .padding(.horizontal, AppTheme.Spacing.l)
                 }
 
                 // ── NO DOG — plan intro ────────────────────────────────
@@ -136,6 +123,7 @@ struct TodayView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .background(AppTheme.appBackground.ignoresSafeArea())
         .overlay(alignment: .top) {
             if let msg = router.toastMessage {
                 ToastBanner(message: msg)
@@ -177,6 +165,10 @@ struct TodayView: View {
         .sheet(isPresented: $router.showToiletLog) {
             ToiletEventSheet(isPresented: $router.showToiletLog)
         }
+        // Voice quick log sheet
+        .sheet(isPresented: $router.showVoiceLog) {
+            VoiceQuickLogView(isPresented: $router.showVoiceLog)
+        }
     }
 
     // MARK: - CTA handler
@@ -188,55 +180,11 @@ struct TodayView: View {
         case .activity(let type):
             router.startQuickLog(type: type)
         case .rest:
-            break // no log needed
+            break
         case .reviewTask(let id):
             router.navigateToday(to: .taskDetail(id))
         case .balanced:
             router.navigateToday(to: .dailySummary)
-        }
-    }
-
-    // MARK: - Section titles
-
-    private var trainingTasksTitle: String {
-        let pending = appState.currentPlan?.todaysTasks.filter { $0.status == .pending }.count ?? 0
-        return pending == 0 ? "Training tasks ✓" : "Training tasks (\(pending) pending)"
-    }
-
-    // MARK: - Task list (inside collapsible)
-
-    @ViewBuilder
-    private var taskList: some View {
-        if let tasks = appState.currentPlan?.todaysTasks, !tasks.isEmpty {
-            VStack(spacing: AppTheme.Spacing.xs) {
-                ForEach(tasks) { task in
-                    TaskCard(task: task) {
-                        router.navigateToday(to: .taskDetail(task.id))
-                    }
-                }
-            }
-        } else if let completed = appState.currentPlan?.completedTasks, !completed.isEmpty {
-            VStack(spacing: AppTheme.Spacing.xs) {
-                Text("All done for today ✓")
-                    .font(AppTheme.Font.title(14))
-                    .foregroundColor(.green)
-                    .frame(maxWidth: .infinity)
-                    .padding(AppTheme.Spacing.m)
-            }
-        }
-        // Completed tasks
-        if let completed = appState.currentPlan?.completedTasks, !completed.isEmpty {
-            DisclosureGroup {
-                ForEach(completed) { task in
-                    TaskCard(task: task) {
-                        router.navigateToday(to: .taskDetail(task.id))
-                    }
-                }
-            } label: {
-                Text("Done today (\(completed.count))")
-                    .font(AppTheme.Font.caption(13))
-                    .foregroundColor(.secondary)
-            }
         }
     }
 }
@@ -248,26 +196,37 @@ private struct DogAvatarHero: View {
     let dogState: DogState
     let activities: [DailyActivity]
 
-    @State private var selectedExplanation: StateExplanation? = nil
-    @State private var showSecondaryStats = false
+    @State private var selectedMetric: DogState.Metric? = nil
+    @State private var showStateExplanation = false
 
     private var avatarState: DogAvatarState { DogAvatarState.from(dogState) }
 
-    private var explanations: [StateExplanation] {
-        StateExplanation.explanations(for: dogState, dogName: dog.name, activities: activities)
-    }
-
-    private func explanation(for param: StateExplanation.Parameter) -> StateExplanation? {
-        explanations.first { $0.parameter == param }
-    }
-
     var body: some View {
         VStack(spacing: AppTheme.Spacing.m) {
-            // Avatar centered
+            // Avatar centered — warm circular background, tappable for state explanation
             HStack {
                 Spacer()
-                DogAvatarView(avatarState: avatarState, coatColor: dog.coatColor, size: 120)
+                Button {
+                    showStateExplanation = true
+                } label: {
+                    ZStack {
+                        Circle()
+                            .fill(AppTheme.warmSubtleGradient)
+                            .frame(width: 152, height: 152)
+                            .shadow(color: Color(hex: "#FF9500").opacity(0.12), radius: 16, x: 0, y: 6)
+                        AvatarStateMachineView(profile: dog, avatarState: avatarState, size: 120)
+                    }
+                }
+                .buttonStyle(.plain)
                 Spacer()
+            }
+            .sheet(isPresented: $showStateExplanation) {
+                AvatarStateExplanationSheet(
+                    profile: dog,
+                    avatarState: avatarState,
+                    stateReason: nil,
+                    recommendedAction: nil
+                )
             }
 
             // Name + state label
@@ -281,137 +240,77 @@ private struct DogAvatarHero: View {
                     .foregroundColor(.secondary)
             }
 
-            // Primary stats: Energy, Hunger, Happiness
-            VStack(spacing: AppTheme.Spacing.s) {
-                HStack(spacing: AppTheme.Spacing.s) {
-                    statCell(param: .energy,    value: dogState.energyLevel)
-                    statCell(param: .hunger,    value: dogState.hungerLevel)
-                    statCell(param: .happiness, value: dogState.satisfaction)
-                }
-
-                // Secondary stats (expandable)
-                if showSecondaryStats {
-                    HStack(spacing: AppTheme.Spacing.s) {
-                        statCell(param: .calmness,   value: dogState.calmness)
-                        statCell(param: .confidence, value: dogState.behaviorStability)
-                        statCell(param: .engagement, value: dogState.focusOnOwner)
-                    }
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-                }
-
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) { showSecondaryStats.toggle() }
-                } label: {
-                    HStack(spacing: 4) {
-                        Text(showSecondaryStats ? "Less" : "More stats")
-                            .font(AppTheme.Font.caption(12))
-                        Image(systemName: showSecondaryStats ? "chevron.up" : "chevron.down")
-                            .font(.system(size: 10))
-                    }
-                    .foregroundColor(.secondary)
+            // 4-metric grid: Nutrition · Activity · Training · Bond
+            LazyVGrid(
+                columns: [GridItem(.flexible()), GridItem(.flexible())],
+                spacing: AppTheme.Spacing.s
+            ) {
+                ForEach(dogState.displayMetrics, id: \.label) { metric in
+                    metricCell(metric: metric)
                 }
             }
             .padding(AppTheme.Spacing.m)
             .cardStyle()
         }
-        .sheet(item: $selectedExplanation) { exp in
-            StateExplanationSheet(explanation: exp)
+        .sheet(item: $selectedMetric) { metric in
+            MetricExplanationSheet(metric: metric)
                 .presentationDetents([.medium])
         }
     }
 
-    private func statCell(param: StateExplanation.Parameter, value: Double) -> some View {
-        Button {
-            selectedExplanation = explanation(for: param)
-        } label: {
-            VStack(spacing: 4) {
-                HStack(spacing: 3) {
-                    Text(param.icon).font(.system(size: 11))
-                    Text(param.displayName)
+    private func metricCell(metric: DogState.Metric) -> some View {
+        Button { selectedMetric = metric } label: {
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(spacing: 4) {
+                    Text(metric.icon).font(.system(size: 13))
+                    Text(metric.label)
                         .font(AppTheme.Font.caption(11))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
+                    Spacer()
+                    Text("\(Int(metric.value * 100))%")
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .foregroundColor(metricColor(metric.value))
                 }
-                StatBar(value: value, param: param)
-                Text(valueLabel(value, param: param))
-                    .font(AppTheme.Font.caption(10))
-                    .foregroundColor(barColor(value, param: param))
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(AppTheme.progressTrack)
+                            .frame(height: 5)
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(metricColor(metric.value))
+                            .frame(width: geo.size.width * min(metric.value, 1.0), height: 5)
+                            .animation(.easeInOut(duration: 0.5), value: metric.value)
+                    }
+                }
+                .frame(height: 5)
             }
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(AppTheme.Spacing.s)
+            .background(metricColor(metric.value).opacity(0.05))
+            .cornerRadius(AppTheme.Radius.s)
         }
         .buttonStyle(.plain)
     }
 
-    private func valueLabel(_ v: Double, param: StateExplanation.Parameter) -> String {
-        if param == .hunger {
-            switch v {
-            case 0.8...: return "Hungry"
-            case 0.5...: return "Peckish"
-            default:     return "Fed"
-            }
-        }
-        switch v {
-        case 0.75...: return "High"
-        case 0.5...:  return "Good"
-        case 0.25...: return "Low"
-        default:      return "Very low"
-        }
-    }
-
-    private func barColor(_ v: Double, param: StateExplanation.Parameter) -> Color {
-        let exp = StateExplanation(
-            parameter: param, value: v, isNormal: true, cause: "", recommendation: ""
-        )
-        switch exp.severityColor {
-        case .good:    return .green
-        case .warning: return .orange
-        case .bad:     return .red
-        }
+    private func metricColor(_ value: Double) -> Color {
+        value >= 0.65 ? .green : (value >= 0.4 ? .orange : .red)
     }
 }
 
-private struct StatBar: View {
-    let value: Double
-    let param: StateExplanation.Parameter
+// MARK: - DogState.Metric identifiable for sheet
+
+extension DogState.Metric: Identifiable {
+    public var id: String { label }
+}
+
+// MARK: - MetricExplanationSheet
+
+private struct MetricExplanationSheet: View {
+    let metric: DogState.Metric
 
     private var color: Color {
-        let exp = StateExplanation(
-            parameter: param, value: value, isNormal: true, cause: "", recommendation: ""
-        )
-        switch exp.severityColor {
-        case .good:    return .green
-        case .warning: return .orange
-        case .bad:     return .red
-        }
-    }
-
-    var body: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(Color(UIColor.tertiarySystemBackground))
-                    .frame(height: 6)
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(color)
-                    .frame(width: geo.size.width * min(value, 1.0), height: 6)
-                    .animation(.easeInOut(duration: 0.4), value: value)
-            }
-        }
-        .frame(height: 6)
-    }
-}
-
-// MARK: - State Explanation Sheet
-
-private struct StateExplanationSheet: View {
-    let explanation: StateExplanation
-
-    private var barColor: Color {
-        switch explanation.severityColor {
-        case .good:    return .green
-        case .warning: return .orange
-        case .bad:     return .red
-        }
+        metric.value >= 0.65 ? .green : (metric.value >= 0.4 ? .orange : .red)
     }
 
     var body: some View {
@@ -420,56 +319,46 @@ private struct StateExplanationSheet: View {
             HStack(spacing: AppTheme.Spacing.m) {
                 ZStack {
                     RoundedRectangle(cornerRadius: AppTheme.Radius.s)
-                        .fill(barColor.opacity(0.12))
+                        .fill(color.opacity(0.12))
                         .frame(width: 52, height: 52)
-                    Text(explanation.parameter.icon)
-                        .font(.system(size: 26))
+                    Text(metric.icon).font(.system(size: 26))
                 }
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(explanation.parameter.displayName)
-                        .font(AppTheme.Font.headline(18))
-                    Text(explanation.valueLabel)
+                    Text(metric.label).font(AppTheme.Font.headline(18))
+                    Text("\(Int(metric.value * 100))%")
                         .font(AppTheme.Font.caption(13))
-                        .foregroundColor(barColor)
-                        .fontWeight(.medium)
+                        .foregroundColor(color)
+                        .fontWeight(.semibold)
                 }
                 Spacer()
-                // Mini bar
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("\(Int(explanation.value * 100))%")
-                        .font(AppTheme.Font.caption(12))
-                        .foregroundColor(.secondary)
-                    ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(Color(UIColor.tertiarySystemBackground))
-                            .frame(width: 80, height: 8)
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(barColor)
-                            .frame(width: 80 * min(explanation.value, 1.0), height: 8)
-                    }
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(AppTheme.progressTrack)
+                        .frame(width: 80, height: 8)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(color)
+                        .frame(width: 80 * min(metric.value, 1.0), height: 8)
                 }
             }
             .padding(AppTheme.Spacing.m)
             .cardStyle()
 
-            // Why
             VStack(alignment: .leading, spacing: AppTheme.Spacing.s) {
-                Label("Why this value", systemImage: "info.circle")
+                Label("What this means", systemImage: "info.circle")
                     .font(AppTheme.Font.title(14))
                     .foregroundColor(.secondary)
-                Text(explanation.cause)
+                Text(metric.explanation)
                     .font(AppTheme.Font.body(15))
                     .lineSpacing(4)
             }
             .padding(AppTheme.Spacing.m)
             .cardStyle()
 
-            // Recommendation
             VStack(alignment: .leading, spacing: AppTheme.Spacing.s) {
                 Label("What to do", systemImage: "lightbulb.fill")
                     .font(AppTheme.Font.title(14))
                     .foregroundColor(.orange)
-                Text(explanation.recommendation)
+                Text(metric.recommendation)
                     .font(AppTheme.Font.body(15))
                     .lineSpacing(4)
             }
@@ -480,7 +369,6 @@ private struct StateExplanationSheet: View {
             Spacer()
         }
         .padding(AppTheme.Spacing.l)
-        .navigationTitle(explanation.parameter.displayName)
     }
 }
 
@@ -504,7 +392,6 @@ private struct CurrentActionCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.m) {
-            // Action row
             HStack(spacing: AppTheme.Spacing.m) {
                 ZStack {
                     RoundedRectangle(cornerRadius: AppTheme.Radius.s)
@@ -520,7 +407,6 @@ private struct CurrentActionCard: View {
                         Text(action.subtitle)
                             .font(AppTheme.Font.caption(13))
                             .foregroundColor(.secondary)
-                        // Timing badge
                         if let hint = action.timingHint {
                             Text(hint)
                                 .font(AppTheme.Font.caption(11))
@@ -533,7 +419,6 @@ private struct CurrentActionCard: View {
                     }
                 }
                 Spacer()
-                // Expand rationale toggle (only when rationale exists)
                 if !action.rationale.isEmpty {
                     Button {
                         withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() }
@@ -545,7 +430,6 @@ private struct CurrentActionCard: View {
                 }
             }
 
-            // Methodology tip — always visible, 1 short line
             if let tip = action.methodologyTip {
                 HStack(alignment: .top, spacing: AppTheme.Spacing.xs) {
                     Image(systemName: "lightbulb")
@@ -559,7 +443,6 @@ private struct CurrentActionCard: View {
                 }
             }
 
-            // Rationale (expanded, optional deep-dive)
             if expanded && !action.rationale.isEmpty {
                 Text(action.rationale)
                     .font(AppTheme.Font.body(14))
@@ -568,7 +451,6 @@ private struct CurrentActionCard: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
-            // CTA — hidden during rest and for balanced / rest action types
             if !isResting && action.type != .rest && action.type != .balanced {
                 Button(action: onCTA) {
                     Text(action.ctaLabel)
@@ -628,15 +510,41 @@ private struct NextActionPill: View {
         }
         .padding(.horizontal, AppTheme.Spacing.s)
         .padding(.vertical, 6)
-        .background(isDuringRest
-            ? Color(UIColor.tertiarySystemBackground)
-            : Color(UIColor.secondarySystemBackground))
+        .background(isDuringRest ? AppTheme.progressTrack : AppTheme.cardBackground)
         .cornerRadius(AppTheme.Radius.s)
         .opacity(isDuringRest ? 0.7 : 1.0)
     }
 }
 
 // MARK: - Mini action button (quick access row)
+
+// MARK: - Mode Pill
+
+private struct ModePill: View {
+    let isFutureDogMode: Bool
+    let dogName: String?
+
+    var body: some View {
+        guard let name = dogName else { return AnyView(EmptyView()) }
+        let text = isFutureDogMode ? "Future Dog Mode — \(name)" : "Real Dog Mode — \(name)"
+        let color: Color = isFutureDogMode ? .purple : AppTheme.primaryFallback
+        return AnyView(
+            HStack(spacing: 5) {
+                Text(isFutureDogMode ? "🔮" : "🐕").font(.system(size: 10))
+                Text(text)
+                    .font(AppTheme.Font.caption(11))
+                    .fontWeight(.medium)
+                    .foregroundColor(color)
+            }
+            .padding(.horizontal, 9)
+            .padding(.vertical, 4)
+            .background(color.opacity(0.09))
+            .cornerRadius(12)
+        )
+    }
+}
+
+// MARK: - Mini Action Button (kept for backward compat, no longer rendered in Today)
 
 private struct MiniActionButton: View {
     let icon: String
@@ -684,7 +592,7 @@ private struct CollapsibleSection<Content: View>: View {
                         .foregroundColor(.secondary)
                 }
                 .padding(AppTheme.Spacing.m)
-                .background(Color(UIColor.secondarySystemBackground))
+                .background(AppTheme.cardBackground)
                 .cornerRadius(AppTheme.Radius.m)
             }
             .buttonStyle(.plain)
@@ -704,7 +612,6 @@ struct CompactBadges: View {
 
     var body: some View {
         HStack(spacing: AppTheme.Spacing.xs) {
-            // Streak shields
             if progress.streakShields > 0 {
                 HStack(spacing: 2) {
                     ForEach(0..<progress.streakShields, id: \.self) { _ in
@@ -729,16 +636,6 @@ struct CompactBadges: View {
                 .background(Color.orange.opacity(0.1))
                 .cornerRadius(AppTheme.Radius.s)
             }
-            HStack(spacing: 4) {
-                Text(progress.level.icon).font(.system(size: 13))
-                Text("\(progress.totalPoints)pts")
-                    .font(AppTheme.Font.caption(12))
-                    .fontWeight(.semibold)
-            }
-            .padding(.horizontal, AppTheme.Spacing.s)
-            .padding(.vertical, 4)
-            .background(AppTheme.primaryFallback.opacity(0.1))
-            .cornerRadius(AppTheme.Radius.s)
         }
     }
 }
@@ -831,7 +728,7 @@ struct AgeProgressionBanner: View {
 struct ProgressInsightBanner: View {
     let insight: String
     var body: some View {
-        NavigationLink(destination: BehaviorProgressView()) {
+        NavigationLink(destination: WeeklySummaryView()) {
             HStack(alignment: .top, spacing: AppTheme.Spacing.s) {
                 Image(systemName: "sparkles").foregroundColor(.purple).font(.system(size: 13)).padding(.top, 1)
                 VStack(alignment: .leading, spacing: 2) {
@@ -905,7 +802,7 @@ struct FullDayCelebrationCard: View {
             Text("🏆").font(.system(size: 28))
             VStack(alignment: .leading, spacing: 2) {
                 Text("Full day complete!").font(AppTheme.Font.title(15))
-                Text("You logged all 4 activities. Bonus points earned.").font(AppTheme.Font.caption(13)).foregroundColor(.secondary)
+                Text("You logged all 4 activities today — great consistency!").font(AppTheme.Font.caption(13)).foregroundColor(.secondary)
             }
             Spacer()
         }
@@ -913,6 +810,47 @@ struct FullDayCelebrationCard: View {
         .background(Color.yellow.opacity(0.1))
         .cornerRadius(AppTheme.Radius.m)
         .overlay(RoundedRectangle(cornerRadius: AppTheme.Radius.m).stroke(Color.yellow.opacity(0.3), lineWidth: 1))
+    }
+}
+
+// MARK: - Remaining Activity Hint
+
+struct RemainingActivityHint: View {
+    @EnvironmentObject var appState: AppState
+
+    private var incompleteNames: [String] {
+        guard let norms = appState.activityNorms else {
+            return DailyActivity.ActivityType.allCases
+                .filter { type in !appState.todayActivities.contains { $0.type == type && $0.completed } }
+                .map { $0.displayName }
+        }
+        var names: [String] = []
+        let acts = appState.todayActivities
+        if NormCalculationService.feedingCompletion(activities: acts, norms: norms) < 1.0 { names.append("Feeding") }
+        if NormCalculationService.walkCompletion(activities: acts, norms: norms)    < 1.0 { names.append("Walk") }
+        if NormCalculationService.playCompletion(activities: acts, norms: norms)    < 1.0 { names.append("Play") }
+        if NormCalculationService.trainingCompletion(activities: acts, norms: norms) < 1.0 { names.append("Training") }
+        return names
+    }
+
+    var body: some View {
+        let names = incompleteNames
+        guard !names.isEmpty else { return AnyView(EmptyView()) }
+        let label = names.count == 1
+            ? "\(names[0]) still needed today"
+            : "\(names.joined(separator: ", ")) still needed today"
+        return AnyView(
+            HStack(spacing: AppTheme.Spacing.s) {
+                Image(systemName: "checkmark.circle").foregroundColor(.secondary).font(.system(size: 13))
+                Text(label)
+                    .font(AppTheme.Font.caption(13))
+                    .foregroundColor(.secondary)
+                Spacer()
+            }
+            .padding(AppTheme.Spacing.m)
+            .background(AppTheme.cardBackground)
+            .cornerRadius(AppTheme.Radius.m)
+        )
     }
 }
 
@@ -928,7 +866,7 @@ struct ToastBanner: View {
             Spacer()
         }
         .padding(AppTheme.Spacing.m)
-        .background(Color(UIColor.secondarySystemBackground))
+        .background(AppTheme.cardBackground)
         .cornerRadius(AppTheme.Radius.m)
         .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
     }

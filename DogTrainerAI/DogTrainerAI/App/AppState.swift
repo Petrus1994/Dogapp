@@ -585,10 +585,16 @@ final class AppState: ObservableObject {
         !todayActivities.isEmpty
     }
 
-    // True when all 4 activity types have been logged today
+    // True when all 4 activity types are fully completed (at or above norm targets)
     var completedFullDayToday: Bool {
-        let completedTypes = Set(todayActivities.filter { $0.completed }.map { $0.type })
-        return completedTypes.count == DailyActivity.ActivityType.allCases.count
+        guard let norms = activityNorms else {
+            let completedTypes = Set(todayActivities.filter { $0.completed }.map { $0.type })
+            return completedTypes.count == DailyActivity.ActivityType.allCases.count
+        }
+        return NormCalculationService.walkCompletion(activities: todayActivities, norms: norms) >= 1.0
+            && NormCalculationService.playCompletion(activities: todayActivities, norms: norms) >= 1.0
+            && NormCalculationService.feedingCompletion(activities: todayActivities, norms: norms) >= 1.0
+            && NormCalculationService.trainingCompletion(activities: todayActivities, norms: norms) >= 1.0
     }
 
     // Activity norms for the current dog profile (nil for no-dog users)

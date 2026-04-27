@@ -379,7 +379,7 @@ struct ContextEngine {
             !$0.isCompleted && !$0.skipped && $0.phase != currentPhase
         }
         guard let next else { return nil }
-        let subtitle = next.isPast ? "Overdue" : next.timeLabel
+        let subtitle = next.isPast ? "\(phaseShortTitle(next.phase, name: name)) is overdue" : next.timeLabel
         return Action(
             icon: phaseIcon(next.phase),
             title: phaseShortTitle(next.phase, name: name),
@@ -502,7 +502,7 @@ struct ContextEngine {
     private static func phaseShortTitle(_ phase: CyclePhase, name: String) -> String {
         switch phase {
         case .toilet:   return "Toilet break"
-        case .physical: return "Activity time"
+        case .physical: return "Walk / Play"
         case .mental:   return "Training"
         case .feeding:  return "Feeding"
         case .sleep:    return "Rest"

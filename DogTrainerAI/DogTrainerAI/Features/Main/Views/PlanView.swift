@@ -3,8 +3,8 @@ import SwiftUI
 struct PlanView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var router: AppRouter
-    @State private var showFullPlan = false
     @State private var selectedTask: TrainingTask?
+    @State private var showReview = false
 
     var body: some View {
         NavigationStack {
@@ -30,41 +30,31 @@ struct PlanView: View {
                                     .padding(.horizontal, AppTheme.Spacing.l)
                             }
 
-                            // Full plan (collapsible)
-                            DisclosureGroup(isExpanded: $showFullPlan) {
-                                let daysSinceStart = Calendar.current.dateComponents([.day], from: plan.startDate, to: Date()).day ?? 0
-                                let currentDay = max(1, daysSinceStart + 1)
-                                VStack(spacing: AppTheme.Spacing.l) {
-                                    ForEach(1...7, id: \.self) { day in
-                                        let dayTasks = plan.tasks.filter { $0.scheduledDay == day }
-                                        if !dayTasks.isEmpty {
-                                            daySection(
-                                                day: day,
-                                                currentDay: currentDay,
-                                                tasks: dayTasks,
-                                                onTap: { taskId in
-                                                    selectedTask = plan.tasks.first { $0.id == taskId }
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                                .padding(.top, AppTheme.Spacing.s)
+                            // Today completion status
+                            todayCompletionFooter(plan: plan)
+                                .padding(.horizontal, AppTheme.Spacing.l)
+
+                            // Review link
+                            Button {
+                                showReview = true
                             } label: {
-                                HStack {
-                                    Text("Full \(dayCount(plan))-day plan")
-                                        .font(AppTheme.Font.title(14))
+                                HStack(spacing: AppTheme.Spacing.m) {
+                                    Image(systemName: "calendar.badge.clock")
+                                        .foregroundColor(AppTheme.primaryFallback)
+                                        .frame(width: 22)
+                                    Text("Review Progress")
+                                        .font(AppTheme.Font.body(14))
                                         .foregroundColor(.primary)
                                     Spacer()
-                                    Text("\(Int(plan.progressFraction * 100))% complete")
-                                        .font(AppTheme.Font.caption(12))
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption2)
                                         .foregroundColor(.secondary)
                                 }
                                 .padding(AppTheme.Spacing.m)
-                                .background(Color(UIColor.secondarySystemBackground))
-                                .cornerRadius(AppTheme.Radius.m)
+                                .cardStyle()
+                                .padding(.horizontal, AppTheme.Spacing.l)
                             }
-                            .padding(.horizontal, AppTheme.Spacing.l)
+                            .buttonStyle(.plain)
 
                             Spacer(minLength: AppTheme.Spacing.xl)
                         }
@@ -73,6 +63,7 @@ struct PlanView: View {
                     LoadingView(message: "No plan yet")
                 }
             }
+            .background(AppTheme.appBackground.ignoresSafeArea())
             .navigationTitle("Your Plan")
             .navigationBarTitleDisplayMode(.large)
             .sheet(item: $selectedTask) { task in
@@ -80,11 +71,12 @@ struct PlanView: View {
                     TaskDetailView(task: task)
                 }
             }
+            .sheet(isPresented: $showReview) {
+                NavigationStack {
+                    WeeklySummaryView()
+                }
+            }
         }
-    }
-
-    private func dayCount(_ plan: Plan) -> Int {
-        Set(plan.tasks.map { $0.scheduledDay }).max() ?? 7
     }
 
     @ViewBuilder
@@ -122,117 +114,50 @@ struct PlanView: View {
         }
     }
 
-    private func sectionCard<Content: View>(title: String, icon: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: AppTheme.Spacing.s) {
+    @ViewBuilder
+    private func todayCompletionFooter(plan: Plan) -> some View {
+        let todayTasks = plan.todaysTasks
+        let done = todayTasks.filter { $0.status == .completed || $0.status == .partial }.count
+        let total = todayTasks.count
+
+        if total == 0 {
+            EmptyView()
+        } else if done == total {
             HStack(spacing: AppTheme.Spacing.s) {
-                Text(icon)
-                Text(title).font(AppTheme.Font.title(15))
-            }
-            content()
-        }
-        .padding(AppTheme.Spacing.m)
-        .cardStyle()
-        .padding(.horizontal, AppTheme.Spacing.l)
-    }
-
-    private func daySection(
-        day: Int,
-        currentDay: Int,
-        tasks: [TrainingTask],
-        onTap: @escaping (String) -> Void
-    ) -> some View {
-        let isFuture = day > currentDay
-        let isToday  = day == currentDay
-        let label    = isToday ? "Today — Day \(day)" : (day < currentDay ? "Day \(day)" : "Day \(day) — Upcoming")
-
-        return VStack(alignment: .leading, spacing: AppTheme.Spacing.s) {
-            HStack(spacing: AppTheme.Spacing.s) {
-                if isToday {
-                    Circle().fill(AppTheme.primaryFallback).frame(width: 8, height: 8)
+                Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Great work today!")
+                        .font(AppTheme.Font.title(14))
+                    Text("Tomorrow's plan will adapt based on today's results.")
+                        .font(AppTheme.Font.caption(12))
+                        .foregroundColor(.secondary)
                 }
-                Text(label)
-                    .font(AppTheme.Font.title(14))
-                    .foregroundColor(isFuture ? .secondary : .primary)
-                Spacer()
-                Text("\(tasks.filter { $0.status == .completed || $0.status == .partial }.count)/\(tasks.count)")
-                    .font(AppTheme.Font.caption())
-                    .foregroundColor(.secondary)
             }
-            .padding(.horizontal, AppTheme.Spacing.l)
-
-            ForEach(tasks) { task in
-                Button(action: { onTap(task.id) }) {
-                    HStack(spacing: AppTheme.Spacing.s) {
-                        statusCircle(task.status)
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: AppTheme.Spacing.xs) {
-                                Text(task.category.icon).font(.system(size: 12))
-                                Text(task.title)
-                                    .font(AppTheme.Font.body(14))
-                                    .strikethrough(task.status == .completed)
-                                    .foregroundColor(isFuture ? .secondary : .primary)
-                            }
-                            Text(task.expectedOutcome)
-                                .font(AppTheme.Font.caption(12))
-                                .foregroundColor(.secondary)
-                                .lineLimit(1)
-                        }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption2)
-                            .foregroundColor(.secondary.opacity(isFuture ? 0.4 : 1))
-                    }
-                    .padding(.horizontal, AppTheme.Spacing.l)
-                    .padding(.vertical, AppTheme.Spacing.xs)
-                    .opacity(isFuture ? 0.55 : 1)
+            .padding(AppTheme.Spacing.m)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.green.opacity(0.08))
+            .cornerRadius(AppTheme.Radius.m)
+        } else {
+            let pending = todayTasks.filter { $0.status != .completed && $0.status != .partial }
+            VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
+                HStack(spacing: AppTheme.Spacing.s) {
+                    Image(systemName: "clock").foregroundColor(.orange)
+                    Text("\(pending.count) task\(pending.count == 1 ? "" : "s") still to do today:")
+                        .font(AppTheme.Font.caption(13))
+                        .foregroundColor(.secondary)
                 }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    private func categorySection(
-        category: TrainingTask.TaskCategory,
-        tasks: [TrainingTask],
-        onTap: @escaping (String) -> Void
-    ) -> some View {
-        VStack(alignment: .leading, spacing: AppTheme.Spacing.s) {
-            HStack(spacing: AppTheme.Spacing.s) {
-                Text(category.icon)
-                Text(category.displayName)
-                    .font(AppTheme.Font.title(14))
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text("\(tasks.filter { $0.status == .completed || $0.status == .partial }.count)/\(tasks.count)")
-                    .font(AppTheme.Font.caption())
-                    .foregroundColor(.secondary)
-            }
-            .padding(.horizontal, AppTheme.Spacing.l)
-
-            ForEach(tasks) { task in
-                Button(action: { onTap(task.id) }) {
-                    HStack(spacing: AppTheme.Spacing.s) {
-                        statusCircle(task.status)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(task.title)
-                                .font(AppTheme.Font.body(14))
-                                .strikethrough(task.status == .completed)
-                                .foregroundColor(.primary)
-                            Text(task.expectedOutcome)
-                                .font(AppTheme.Font.caption(12))
-                                .foregroundColor(.secondary)
-                                .lineLimit(1)
-                        }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.horizontal, AppTheme.Spacing.l)
-                    .padding(.vertical, AppTheme.Spacing.xs)
+                ForEach(pending.prefix(3)) { task in
+                    Text("· \(task.title)")
+                        .font(AppTheme.Font.caption(13))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .padding(.leading, AppTheme.Spacing.l)
                 }
-                .buttonStyle(.plain)
             }
+            .padding(AppTheme.Spacing.m)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.orange.opacity(0.08))
+            .cornerRadius(AppTheme.Radius.m)
         }
     }
 
@@ -302,10 +227,6 @@ struct PlanHeaderCard: View {
                     .font(.system(size: 36))
             }
 
-            ProgressBarView(progress: plan.progressFraction)
-            Text("\(Int(plan.progressFraction * 100))% complete")
-                .font(AppTheme.Font.caption())
-                .foregroundColor(.secondary)
         }
         .padding(AppTheme.Spacing.m)
         .background(
