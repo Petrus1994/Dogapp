@@ -13,7 +13,11 @@ model User {
   id              String    @id @default(cuid())
   email           String    @unique
   emailVerified   Boolean   @default(false)
-  passwordHash    String
+  passwordHash    String?   // null for Apple / Google users
+  authProvider    String    @default("email")   // "email" | "apple" | "google"
+  appleUserId     String?   @unique
+  googleUserId    String?   @unique
+  marketingOptIn  Boolean   @default(false)
   displayName     String?
   scenarioType    String?
   onboardingDone  Boolean   @default(false)
@@ -31,9 +35,11 @@ model User {
   subscription              Subscription?
   subscriptionEvents        SubscriptionEvent[]
   aiUsage                   AiUsage[]
+  referralCode              String?           @unique  // human-readable invite code e.g. "LUNA4K8A"
   referralsGiven            Referral[]        @relation("ReferrerRelation")
   referralReceived          Referral?         @relation("ReferredRelation")
   referralRewards           ReferralReward[]
+  futureDogProfile          FutureDogProfile?
   notificationTokens        NotificationToken[]
   notificationJobs          NotificationJob[]
   userProgress              UserProgress?
@@ -101,6 +107,8 @@ model Dog {
   coatColor             String?   // drives avatar appearance
   photoUrl        String?
   isActive        Boolean   @default(true)
+  isWorkingDog    Boolean   @default(false)  // hunting, protection, service, sport — adjusts plan tone
+  lifestyleNote   String?                    // free-text owner context ("trained for protection work")
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
@@ -128,8 +136,97 @@ model Dog {
   trainingPlans         TrainingPlan[]
   taskFeedback          TaskFeedback[]
   notificationJobs      NotificationJob[]
+  avatar                DogAvatar?
+  visualTraits          DogVisualTraits?
+  avatarGenerationJobs  DogAvatarGenerationJob[]
+  avatarStateHistory    DogAvatarStateHistory[]
 
   @@map("dogs")
+}
+
+// ─── AVATAR SYSTEM ───────────────────────────────────────────────────────────
+
+model DogAvatar {
+  id                  String    @id @default(cuid())
+  dogId               String    @unique
+  userId              String
+  masterAvatarUrl     String?
+  thumbnailUrl        String?
+  currentAgeStage     String    @default("puppy")
+  avatarVersion       Int       @default(1)
+  provider            String?
+  generationStatus    String    @default("pending")
+  regenerationCount   Int       @default(0)
+  maxRegenerations    Int       @default(2)
+  referencePhotoUrls  String[]
+  identitySeed        String?   // stores traits hash for consistency across evolutions
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("dog_avatars")
+}
+
+model DogVisualTraits {
+  id                   String   @id @default(cuid())
+  dogId                String   @unique
+  userProvidedBreed    String?
+  breedGuessFromImage  String?
+  coatColor            String?
+  coatPattern          String?
+  coatLength           String?
+  coatTexture          String?
+  earType              String?
+  muzzleShape          String?
+  noseColor            String?
+  eyeColor             String?
+  tailType             String?
+  bodyShape            String?
+  sizeClass            String?
+  ageStage             String?
+  distinctiveMarks     String?
+  confidenceScore      Decimal? @db.Decimal(4, 3)
+  warnings             String[]
+  rawAnalysisJson      Json?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("dog_visual_traits")
+}
+
+model DogAvatarGenerationJob {
+  id              String    @id @default(cuid())
+  dogId           String
+  userId          String
+  status          String    @default("queued")  // queued | processing | completed | failed
+  provider        String?
+  inputPhotoUrls  String[]
+  promptVersion   String?
+  errorMessage    String?
+  outputUrl       String?
+  createdAt       DateTime  @default(now())
+  completedAt     DateTime?
+
+  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("dog_avatar_generation_jobs")
+}
+
+model DogAvatarStateHistory {
+  id                    String   @id @default(cuid())
+  dogId                 String
+  avatarState           String
+  triggerReason         String?
+  linkedActivityId      String?
+  linkedNotificationId  String?
+  timestamp             DateTime @default(now())
+
+  dog Dog @relation(fields: [dogId], references: [id], onDelete: Cascade)
+
+  @@map("dog_avatar_state_history")
 }
 
 model DogIssue {
@@ -200,6 +297,10 @@ model TrainingPlan {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  lastAdaptedAt    DateTime?          // when adaptation engine last modified this plan
+  skippedTaskCount Int       @default(0) // rolling count of skipped/ignored tasks
+  simplifiedAt     DateTime?          // set when user accepts "simpler plan" offer
+
   user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   dog   Dog?         @relation(fields: [dogId], references: [id], onDelete: SetNull)
   tasks TrainingTask[]
@@ -218,6 +319,7 @@ model TrainingTask {
   status          String   @default("pending")
   scheduledDay    Int
   notes           String   @default("")
+  guidanceNote    String?  // set by adaptation engine when difficulty is reduced
   updatedAt       DateTime @updatedAt
 
   plan     TrainingPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
@@ -520,6 +622,7 @@ model AiMessage {
   role             String
   content          String
   promptVersionId  String?
+  modelUsed        String?  // which model generated this response
   tokensUsed       Int?
   latencyMs        Int?
   createdAt        DateTime @default(now())
@@ -606,17 +709,80 @@ model SubscriptionEvent {
 }
 
 model AiUsage {
-  id           String   @id @default(cuid())
-  userId       String
-  usageDate    DateTime @db.Date
-  requestCount Int      @default(0)
-  tokenCount   Int      @default(0)
-  updatedAt    DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  userId               String
+  usageDate            DateTime @db.Date
+  requestCount         Int      @default(0)
+  tokenCount           Int      @default(0)
+  advancedRequestCount Int      @default(0)  // gpt-5.5 requests — for cost tracking
+  updatedAt            DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, usageDate])
   @@map("ai_usage")
+}
+
+// ─── FUTURE DOG MODE ─────────────────────────────────────────────────────────
+
+model FutureDogProfile {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  preferredBreed   String?
+  lifestyle        String    @default("moderate")  // active | moderate | calm
+  homeType         String    @default("apartment")  // apartment | house_small | house_large | rural
+  timeAvailability String    @default("moderate")   // low | moderate | high
+  expectedSize     String?                          // small | medium | large
+  preparationStage String    @default("exploring")  // exploring | committed | ready
+  transformedAt    DateTime?                        // set when user gets real dog — profile is kept for AI context
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user              User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  learningProfile   UserLearningProfile?
+  simulationSessions SimulationSession[]
+
+  @@map("future_dog_profiles")
+}
+
+model UserLearningProfile {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  futureDogProfileId   String   @unique
+  decisionsAnalyzed    Int      @default(0)
+  scenariosCompleted   Int      @default(0)
+  consistencyScore     Decimal  @default(0) @db.Decimal(5, 2)
+  knownStrengths       String[]
+  knownGaps            String[]
+  reactionTendencies   String[]
+  overallReadinessScore Decimal @default(0) @db.Decimal(5, 2)
+  lastUpdatedAt        DateTime @default(now())
+
+  futureDogProfile FutureDogProfile @relation(fields: [futureDogProfileId], references: [id], onDelete: Cascade)
+
+  @@map("user_learning_profiles")
+}
+
+model SimulationSession {
+  id                  String    @id @default(cuid())
+  userId              String
+  futureDogProfileId  String
+  category            String    // first_walk | home_arrival | feeding | socialization | evening_calm
+  title               String
+  description         String    @db.Text
+  userResponse        String?   @db.Text
+  aiEvaluation        String?   @db.Text
+  correctApproach     String?   @db.Text
+  whatUnderstood      String?
+  whatToImprove       String?
+  score               Int?      // 0–100
+  completed           Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  completedAt         DateTime?
+
+  futureDogProfile FutureDogProfile @relation(fields: [futureDogProfileId], references: [id], onDelete: Cascade)
+
+  @@map("simulation_sessions")
 }
 
 // ─── REFERRALS ───────────────────────────────────────────────────────────────
@@ -625,11 +791,11 @@ model Referral {
   id              String    @id @default(cuid())
   referrerId      String
   referredId      String?   @unique
-  referralCode    String    @unique @default(cuid())
-  status          String    @default("pending")
+  status          String    @default("registered") // registered | subscribed | rewarded
+  rewardGranted   Boolean   @default(false)
   ipAddressHash   String?
   createdAt       DateTime  @default(now())
-  convertedAt     DateTime?
+  subscribedAt    DateTime?
 
   referrer User            @relation("ReferrerRelation", fields: [referrerId], references: [id], onDelete: Cascade)
   referred User?           @relation("ReferredRelation", fields: [referredId], references: [id], onDelete: SetNull)
