@@ -172,6 +172,25 @@ export class DailyLogService {
     return dailyLog ?? { date: today, walks: [], feedings: [], plays: [], trainingSessions: [], toiletEvents: [], behaviorEvents: [] }
   }
 
+  async getLogsForRange(dogId: string, from: Date, to: Date) {
+    const dailyLogs = await this.db.dailyLog.findMany({
+      where: {
+        dogId,
+        logDate: { gte: from, lte: to },
+      },
+      include: {
+        feedingLogs:    true,
+        walkLogs:       true,
+        playLogs:       true,
+        trainingLogs:   true,
+        toiletEvents:   true,
+        behaviorEvents: { include: { issues: true } },
+      },
+      orderBy: { logDate: 'asc' },
+    })
+    return dailyLogs
+  }
+
   private async getOrCreateDailyLog(dogId: string) {
     const today = todayDate()
     return this.db.dailyLog.upsert({

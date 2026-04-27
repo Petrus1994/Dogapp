@@ -124,4 +124,19 @@ export async function logRoutes(app: FastifyInstance) {
     await resolvedog(req.user.userId, dogId)
     return logSvc.getTodayLogs(dogId)
   })
+
+  app.get('/dogs/:dogId/logs/range', { preHandler: requireAuth }, async (req, reply) => {
+    const { dogId } = req.params as { dogId: string }
+    await resolvedog(req.user.userId, dogId)
+    const { from, to } = req.query as { from?: string; to?: string }
+    if (!from || !to) {
+      return reply.code(400).send({ error: 'from and to query params are required (ISO 8601)' })
+    }
+    const fromDate = new Date(from)
+    const toDate   = new Date(to)
+    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+      return reply.code(400).send({ error: 'Invalid date format. Use ISO 8601.' })
+    }
+    return logSvc.getLogsForRange(dogId, fromDate, toDate)
+  })
 }
